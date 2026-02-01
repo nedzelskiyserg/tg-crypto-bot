@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Зависимости Python
+# Зависимости Python (увеличен таймаут для медленного доступа к PyPI)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+ENV PIP_DEFAULT_TIMEOUT=300
+RUN pip install --no-cache-dir --timeout 300 --retries 5 -r requirements.txt
 
 # Код: backend + miniapp (без лишнего через .dockerignore)
 COPY backend ./backend

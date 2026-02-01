@@ -1,13 +1,13 @@
 # TG CRYPTO BOT — Telegram Mini App + Backend API
 # Запуск: docker compose -f docker-compose.tma.yml up -d
 
-version: '3.8'
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile.tma
+      # Сеть хоста при сборке — помогает при таймаутах PyPI (серверы в РФ)
+      network: host
     container_name: tma_app
     restart: unless-stopped
     ports:
