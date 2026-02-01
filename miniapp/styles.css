@@ -1,0 +1,525 @@
+/* CSS Variables */
+:root {
+    --color-bg: #111111;
+    --color-bg-card: #1C1C1C;
+    --color-accent: #D4AF37;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #A0A0A0;
+    --color-text-muted: #666666;
+    --color-positive: #4CAF50;
+    --color-negative: #F44336;
+
+    --font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+    --spacing-2xl: 24px;
+    --spacing-3xl: 28px;
+    --spacing-4xl: 32px;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+}
+
+/* Reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent pull-to-refresh and swipe gestures that might close the app */
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+}
+
+/* App Container */
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    margin: 0 auto;
+    /* Prevent unwanted scroll behaviors */
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Top Header (based on Pencil design LkvkZ) */
+.top-header {
+    width: 100%;
+    height: 97.92px;
+    min-height: 97.92px;
+    padding: 59px 0 0 0;
+    margin: 0;
+    /* Always visible to take space, but content is invisible until added */
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid transparent;
+    transition: all var(--transition-normal);
+    /* Hide text content until it's added */
+    visibility: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--color-bg);
+    pointer-events: none;
+    /* Text styles - exactly like .exchange-title */
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-text-primary);
+}
+
+/* Show content when text is added */
+.top-header:not(:empty) {
+    visibility: visible;
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-4xl) var(--spacing-3xl) 0;
+    padding-top: calc(77.92px + var(--spacing-4xl));
+}
+
+.logo {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 0.95;
+    color: var(--color-text-primary);
+    text-align: center;
+}
+
+.tagline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--color-accent);
+    text-transform: uppercase;
+}
+
+/* Content */
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4xl);
+    padding: var(--spacing-4xl) var(--spacing-3xl);
+}
+
+/* Main Action Button */
+.btn-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    width: 100%;
+    height: 56px;
+    background-color: var(--color-accent);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-main:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+.btn-main .icon {
+    width: 20px;
+    height: 20px;
+    color: var(--color-bg);
+}
+
+.btn-main span {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-bg);
+}
+
+/* Buttons Grid */
+.buttons-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+/* Animation for buttons */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn-row {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex: 1;
+    height: 56px;
+    background-color: var(--color-bg-card);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideInUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* Cascade animation delays for buttons */
+.buttons-grid .btn-row:nth-child(1) .btn-secondary:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.buttons-grid .btn-row:nth-child(1) .btn-secondary:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.buttons-grid .btn-row:nth-child(2) .btn-secondary:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.buttons-grid .btn-row:nth-child(2) .btn-secondary:nth-child(2) {
+    animation-delay: 0.25s;
+}
+
+.buttons-grid .btn-secondary.btn-full:nth-of-type(1) {
+    animation-delay: 0.3s;
+}
+
+.buttons-grid .btn-secondary.btn-full:nth-of-type(2) {
+    animation-delay: 0.35s;
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+    background-color: #252525;
+}
+
+.btn-secondary .icon {
+    width: 18px;
+    height: 18px;
+    color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.btn-secondary span {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--color-text-primary);
+}
+
+.btn-full {
+    flex: none;
+    width: 100%;
+}
+
+.btn-outlined {
+    border: 1px solid var(--color-accent);
+}
+
+/* Rate Section */
+.rate-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.accent-bar {
+    width: 3px;
+    height: 14px;
+    background-color: var(--color-accent);
+}
+
+.section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--color-text-secondary);
+}
+
+.rate-cards-row {
+    display: flex;
+    gap: 12px;
+}
+
+.rate-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 24px 20px;
+    background-color: var(--color-bg-card);
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.rate-card:active {
+    transform: scale(0.98);
+}
+
+.rate-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rate-label {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    color: #666666;
+}
+
+.rate-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.indicator-green {
+    background-color: #4CAF50;
+}
+
+.indicator-red {
+    background-color: #F44336;
+}
+
+.rate-value {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    color: var(--color-text-primary);
+}
+
+.rate-currency {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-accent);
+}
+
+/* Loading States */
+.btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Ripple Effect */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.ripple:active::after {
+    width: 200%;
+    height: 200%;
+}
+
+/* Skeleton Loading */
+.skeleton {
+    background: linear-gradient(90deg, var(--color-bg-card) 25%, #2a2a2a 50%, var(--color-bg-card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Safe Area for iOS */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .app-container {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* Responsive */
+@media (min-width: 420px) {
+    .app-container {
+        max-width: 420px;
+        margin: 0 auto;
+    }
+}
+
+/* Animation for page load */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.btn-main {
+    animation: fadeInUp 0.4s ease 0.1s forwards;
+    opacity: 0;
+}
+
+.buttons-grid {
+    animation: fadeInUp 0.4s ease 0.2s forwards;
+    opacity: 0;
+}
+
+.rate-section {
+    animation: fadeInUp 0.4s ease 0.3s forwards;
+    opacity: 0;
+}
+
+/* Dark mode specific (Telegram theme support) */
+[data-theme="dark"] {
+    --color-bg: #111111;
+    --color-bg-card: #1C1C1C;
+}
+
+[data-theme="light"] {
+    --color-bg: #F5F5F5;
+    --color-bg-card: #FFFFFF;
+    --color-text-primary: #111111;
+    --color-text-secondary: #666666;
+    --color-text-muted: #999999;
+}
+
+/* ========================================
+   PAGE SYSTEM
+   ======================================== */
+.page {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.page.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+.page-exchange.active {
+    animation: slideInRight 0.3s ease;
+}

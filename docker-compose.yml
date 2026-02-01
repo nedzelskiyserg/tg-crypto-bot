@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: telegram_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./credentials.json:/app/credentials.json:ro
+      - ./menu.xlsx:/app/menu.xlsx:ro
+    networks:
+      - bot_network
+
+  # Mini App будет добавлен позже
+  # miniapp:
+  #   build:
+  #     context: .
+  #     dockerfile: miniapp/Dockerfile
+  #   container_name: telegram_miniapp
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8000:8000"
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - bot_network
+
+networks:
+  bot_network:
+    driver: bridge

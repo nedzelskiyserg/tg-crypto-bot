@@ -1,0 +1,78 @@
+<!-- PAGE: Rate -->
+<div class="page page-rate" id="pageRate">
+    <!-- Top Header (same as other pages) -->
+    <div class="top-header" id="rateTopHeader">КУРС USDT</div>
+
+    <!-- Content -->
+    <div class="rate-content">
+        <!-- Rates Section -->
+        <section class="rate-section">
+            <div class="section-header">
+                <div class="accent-bar"></div>
+                <span class="section-label">ТЕКУЩИЙ КУРС</span>
+            </div>
+            <div class="rate-cards-row">
+                <div class="rate-card buy-card">
+                    <div class="rate-label-wrap">
+                    <span class="rate-label">ПОКУПКА</span>
+                        <span class="rate-indicator indicator-green"></span>
+                    </div>
+                    <span class="rate-value" id="ratePageBuyValue">&nbsp;</span>
+                    <span class="rate-currency">RUB</span>
+                </div>
+                <div class="rate-card sell-card">
+                    <div class="rate-label-wrap">
+                    <span class="rate-label">ПРОДАЖА</span>
+                        <span class="rate-indicator indicator-red"></span>
+                    </div>
+                    <span class="rate-value" id="ratePageSellValue">&nbsp;</span>
+                    <span class="rate-currency">RUB</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Information Section -->
+        <section class="info-section">
+            <div class="section-header">
+                <div class="accent-bar"></div>
+                <span class="section-label">ИНФОРМАЦИЯ</span>
+            </div>
+            <div class="info-card">
+                <div class="info-icon-wrap">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                </div>
+                <div class="info-text-wrap">
+                    <p class="info-text">Данный курс является биржевым и меняется каждую минуту.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Commission Section -->
+        <section class="commission-section">
+            <div class="section-header">
+                <div class="accent-bar"></div>
+                <span class="section-label">КОМИССИЯ</span>
+            </div>
+            <div class="commission-card">
+                <div class="check-icon-wrap">
+                    <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+                <p class="commission-text">Мы не берем никаких дополнительных комиссий с Вас.</p>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <button class="btn-contact" id="goHomeButton" data-action="go-home">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                <span>ПЕРЕЙТИ НА ГЛАВНЫЙ ЭКРАН</span>
+            </button>
+    </div>
+</div>

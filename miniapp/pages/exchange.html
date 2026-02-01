@@ -1,0 +1,239 @@
+<!-- Exchange Page Template -->
+<div class="page page-exchange" id="pageExchange">
+    <!-- Top Header (same as main page) -->
+    <div class="top-header" id="exchangeTopHeader">ОБМЕН</div>
+
+    <!-- Exchange Content -->
+    <main class="exchange-content">
+        <!-- Segmented Control -->
+        <div class="segmented-control">
+            <button class="segment active" data-segment="buy" id="segmentBuy">
+                <span>КУПИТЬ</span>
+            </button>
+            <button class="segment" data-segment="sell" id="segmentSell">
+                <span>ПРОДАТЬ</span>
+            </button>
+        </div>
+
+        <!-- Mode Containers -->
+        <div class="exchange-modes-container">
+            <!-- Buy Mode -->
+            <div class="exchange-mode exchange-mode-buy active" id="buyModeContainer">
+                <!-- Amount Section -->
+                <section class="exchange-section">
+                    <div class="section-header">
+                        <div class="accent-bar"></div>
+                        <span class="section-title">СУММА</span>
+                    </div>
+                    <div class="amount-input-card">
+                        <input type="text"
+                               class="amount-input"
+                               id="amountInput"
+                               value="10,000"
+                               inputmode="decimal"
+                               placeholder="0">
+                        <span class="amount-currency" id="selectedCurrency">RUB</span>
+                    </div>
+                </section>
+
+                <!-- Receive Section -->
+                <section class="exchange-section">
+                    <div class="receive-card">
+                        <input type="text"
+                               class="receive-input"
+                               id="receiveValue"
+                               inputmode="decimal"
+                               placeholder="0">
+                        <span class="receive-currency" id="receiveCurrency">USDT</span>
+                    </div>
+                </section>
+
+                <!-- Rate Info -->
+                <div class="exchange-rate-info">
+                    <div class="rate-info-left">
+                        <svg class="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <span>КУРС ОБМЕНА</span>
+                    </div>
+                    <span class="rate-info-value" id="exchangeRateValue">1 USDT = 97.50 RUB</span>
+                </div>
+
+                <!-- Data Section -->
+                <section class="exchange-section data-section">
+                    <div class="section-header">
+                        <div class="accent-bar"></div>
+                        <span class="section-title">ДАННЫЕ</span>
+                    </div>
+                    <div class="data-inputs">
+                        <div class="input-field">
+                            <input type="text"
+                                   class="text-input"
+                                   id="surnameInput"
+                                   placeholder="Фамилия *"
+                                   autocomplete="family-name">
+                        </div>
+                        <div class="input-field">
+                            <input type="text"
+                                   class="text-input"
+                                   id="nameInput"
+                                   placeholder="Имя *"
+                                   autocomplete="given-name">
+                        </div>
+                        <div class="input-field">
+                            <input type="text"
+                                   class="text-input"
+                                   id="patronymicInput"
+                                   placeholder="Отчество *"
+                                   autocomplete="additional-name">
+                        </div>
+                        <div class="input-field">
+                            <input type="tel"
+                                   class="text-input"
+                                   id="phoneInput"
+                                   placeholder="Телефон *"
+                                   autocomplete="tel">
+                        </div>
+                        <div class="input-field">
+                            <input type="email"
+                                   class="text-input"
+                                   id="emailInput"
+                                   placeholder="Email *"
+                                   autocomplete="email">
+                        </div>
+                        <div class="input-field">
+                            <input type="text"
+                                   class="text-input"
+                                   id="walletInput"
+                                   placeholder="Адрес кошелька TRC-20 (34 символа) *"
+                                   maxlength="34"
+                                   autocomplete="off">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Terms Row -->
+                <div class="terms-row" id="termsRowBuy">
+                    <button class="terms-checkbox" id="termsCheckboxBuy" type="button" aria-checked="false">
+                        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </button>
+                    <span class="terms-text">Я прочитал правила и принимаю условия сервиса</span>
+                </div>
+            </div>
+
+            <!-- Sell Mode -->
+            <div class="exchange-mode exchange-mode-sell" id="sellModeContainer">
+                <!-- Rate Info -->
+                <div class="exchange-rate-info">
+                    <div class="rate-info-left">
+                        <svg class="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <span>КУРС ОБМЕНА</span>
+                    </div>
+                    <span class="rate-info-value" id="exchangeRateValueSell">1 USDT = 97.50 RUB</span>
+                </div>
+
+                <!-- Data Section -->
+                <section class="exchange-section data-section">
+                    <div class="section-header">
+                        <div class="accent-bar"></div>
+                        <span class="section-title">ДАННЫЕ</span>
+                    </div>
+                    <div class="data-inputs">
+                        <div class="input-field">
+                            <input type="text"
+                                   class="text-input"
+                                   id="surnameInputSell"
+                                   placeholder="Фамилия *"
+                                   autocomplete="family-name">
+                        </div>
+                        <div class="input-field">
+                            <input type="text"
+                                   class="text-input"
+                                   id="nameInputSell"
+                                   placeholder="Имя *"
+                                   autocomplete="given-name">
+                        </div>
+                        <div class="input-field">
+                            <input type="text"
+                                   class="text-input"
+                                   id="patronymicInputSell"
+                                   placeholder="Отчество *"
+                                   autocomplete="additional-name">
+                        </div>
+                        <div class="input-field">
+                            <input type="tel"
+                                   class="text-input"
+                                   id="phoneInputSell"
+                                   placeholder="Телефон *"
+                                   autocomplete="tel">
+                        </div>
+                        <div class="input-field">
+                            <input type="email"
+                                   class="text-input"
+                                   id="emailInputSell"
+                                   placeholder="Email *"
+                                   autocomplete="email">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Terms Row -->
+                <div class="terms-row" id="termsRowSell">
+                    <button class="terms-checkbox" id="termsCheckboxSell" type="button" aria-checked="false">
+                        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </button>
+                    <span class="terms-text">Я прочитал правила и принимаю условия сервиса</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button class="btn-submit" id="submitExchange" data-action="submit-exchange" disabled>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>СОЗДАТЬ ЗАЯВКУ</span>
+        </button>
+    </main>
+</div>
+
+<!-- Currency Selection Modal -->
+<div class="modal" id="currencyModal">
+    <div class="modal-overlay" data-action="close-modal"></div>
+    <div class="modal-content">
+        <div class="modal-drag-handle"></div>
+        <div class="modal-header">
+            <h3>Выберите валюту</h3>
+            <button class="modal-close" data-action="close-modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <button class="currency-option selected" data-currency="RUB">
+                <div class="currency-option-info">
+                    <span class="currency-code">RUB</span>
+                    <span class="currency-name">Российский рубль</span>
+                </div>
+            </button>
+            <button class="currency-option" data-currency="USDT">
+                <div class="currency-option-info">
+                    <span class="currency-code">USDT</span>
+                    <span class="currency-name">Tether USD</span>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>

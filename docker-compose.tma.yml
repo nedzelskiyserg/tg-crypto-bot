@@ -1,0 +1,29 @@
+# TG CRYPTO BOT — Telegram Mini App + Backend API
+# Запуск: docker compose -f docker-compose.tma.yml up -d
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.tma
+    container_name: tma_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - DATABASE_URL=sqlite+aiosqlite:////app/data/app.db
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    volumes:
+      - ./data:/app/data
+      - ./admins.xlsx:/app/backend/admins.xlsx:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

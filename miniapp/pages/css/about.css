@@ -1,0 +1,196 @@
+/* ========================================
+   ABOUT PAGE STYLES
+   ======================================== */
+
+/* About Content */
+.about-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 24px 28px;
+    padding-top: calc(97.92px + 24px);
+    padding-bottom: 24px;
+    box-sizing: border-box;
+}
+
+/* ========================================
+   HERO SECTION
+   ======================================== */
+.about-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 24px 0;
+}
+
+.about-logo {
+    font-family: var(--font-family);
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--color-text-primary);
+    text-align: center;
+    margin: 0;
+}
+
+.about-tagline {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--color-accent);
+    text-align: center;
+    margin: 0;
+}
+
+.about-desc {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin: 0;
+    max-width: 300px;
+    line-height: 1.5;
+}
+
+/* ========================================
+   STATS SECTION
+   ======================================== */
+.stats-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stats-grid {
+    display: flex;
+    gap: 12px;
+}
+
+.stat-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px 20px;
+    background-color: var(--color-bg-card);
+}
+
+.stat-label {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    color: var(--color-text-muted);
+}
+
+.stat-value {
+    font-family: var(--font-family);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--color-accent);
+}
+
+/* ========================================
+   FEATURES SECTION
+   ======================================== */
+.features-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.features-list {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-card);
+    overflow: hidden;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    border-bottom: 1px solid #2A2A2A;
+}
+
+.feature-item:last-child {
+    border-bottom: none;
+}
+
+.feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background-color: #282828;
+    flex-shrink: 0;
+}
+
+.feature-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--color-accent);
+}
+
+.feature-text {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.about-hero {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.stats-section {
+    animation: fadeInUp 0.4s ease 0.1s forwards;
+    opacity: 0;
+}
+
+.features-section {
+    animation: fadeInUp 0.4s ease 0.2s forwards;
+    opacity: 0;
+}
+
+/* Stat value counter animation */
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-value {
+    animation: countUp 0.5s ease 0.3s forwards;
+    opacity: 0;
+}
+
+.stat-card:nth-child(2) .stat-value {
+    animation-delay: 0.4s;
+}

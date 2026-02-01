@@ -1,0 +1,295 @@
+/* ========================================
+   RATE PAGE STYLES
+   ======================================== */
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Rate Content */
+.rate-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 28px;
+    padding-top: calc(97.92px + 32px);
+    padding-bottom: calc(56px + 24px + env(safe-area-inset-bottom, 0));
+    box-sizing: border-box;
+}
+
+/* ========================================
+   SECTION HEADERS
+   ======================================== */
+.rate-section .section-header,
+.info-section .section-header,
+.commission-section .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.rate-section .accent-bar,
+.info-section .accent-bar,
+.commission-section .accent-bar {
+    width: 3px;
+    height: 14px;
+    background-color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.rate-section .section-label,
+.info-section .section-label,
+.commission-section .section-label {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--color-text-muted);
+}
+
+/* ========================================
+   RATES SECTION
+   ======================================== */
+.rate-section {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.rate-cards-row {
+    display: flex;
+    gap: 12px;
+}
+
+.rate-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 24px 20px;
+    background-color: var(--color-bg-card);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.rate-card:active {
+    transform: scale(0.98);
+}
+
+.rate-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rate-label {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    color: #666666;
+}
+
+.rate-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.indicator-green {
+    background-color: #4CAF50;
+}
+
+.indicator-red {
+    background-color: #F44336;
+}
+
+.rate-value {
+    font-family: var(--font-family);
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    color: var(--color-text-primary);
+    animation: countUp 0.6s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.rate-currency {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-accent);
+}
+
+/* ========================================
+   INFORMATION SECTION
+   ======================================== */
+.info-section {
+    animation: fadeInUp 0.4s ease forwards;
+    animation-delay: 0.1s;
+    opacity: 0;
+}
+
+.info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+    background-color: var(--color-bg-card);
+}
+
+.info-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: #282828;
+    flex-shrink: 0;
+}
+
+.info-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--color-accent);
+}
+
+.info-text-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.info-text {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+/* ========================================
+   COMMISSION SECTION
+   ======================================== */
+.commission-section {
+    animation: fadeInUp 0.4s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.commission-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    background-color: var(--color-bg-card);
+}
+
+.check-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.check-icon {
+    width: 16px;
+    height: 16px;
+    color: #111111;
+}
+
+.commission-text {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+/* ========================================
+   CONTACT BUTTON (fixed at bottom, same as support page)
+   ======================================== */
+.btn-contact {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    height: 56px;
+    background-color: var(--color-accent);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0));
+    left: 28px;
+    right: 28px;
+    z-index: 200;
+    pointer-events: auto;
+}
+
+.btn-contact:hover {
+    opacity: 0.95;
+}
+
+.btn-contact:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+.btn-contact .icon {
+    width: 20px;
+    height: 20px;
+    color: var(--color-bg);
+}
+
+.btn-contact span {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-bg);
+}
+
+/* ========================================
+   RATE UPDATE ANIMATION
+   ======================================== */
+.rate-value.updating {
+    animation: pulse 0.5s ease;
+}

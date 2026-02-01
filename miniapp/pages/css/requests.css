@@ -1,0 +1,666 @@
+/* ========================================
+   REQUESTS PAGE STYLES
+   ======================================== */
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Requests Content */
+.requests-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px 28px;
+    padding-top: calc(97.92px + 24px);
+    padding-bottom: 24px;
+    box-sizing: border-box;
+}
+
+/* ========================================
+   FILTER TABS
+   ======================================== */
+.filter-tabs {
+    display: flex;
+    background-color: var(--color-bg-card);
+    height: 44px;
+    overflow: hidden;
+}
+
+.filter-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.filter-tab span {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    transition: all var(--transition-fast);
+}
+
+.filter-tab.active {
+    background-color: var(--color-accent);
+}
+
+.filter-tab.active span {
+    font-weight: 600;
+    color: var(--color-bg);
+}
+
+.filter-tab:not(.active):active {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ========================================
+   REQUESTS SECTION
+   ======================================== */
+.requests-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.requests-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.requests-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.requests-count {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+/* ========================================
+   REQUESTS LIST
+   ======================================== */
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    /*background-color: var(--color-bg-card);*/
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+    animation-delay: 0.05s;
+}
+
+/* ========================================
+   REQUEST CARD
+   ======================================== */
+.request-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    padding-left: 0;
+    border-bottom: 1px solid #2A2A2A;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    background-color: var(--color-bg-card);
+    /* Animation will be applied via JavaScript for all cards */
+}
+
+.request-card:last-child {
+    border-bottom: none;
+}
+
+.request-card:active {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Request Accent Bar - Status Colors */
+.request-accent {
+    width: 4px;
+    height: 44px;
+    flex-shrink: 0;
+    transition: background-color var(--transition-fast);
+}
+
+/* Status: Processing (Gold/Yellow) */
+.request-card[data-status="processing"] .request-accent {
+    background-color: var(--color-accent);
+}
+
+.request-card[data-status="processing"] .request-badge {
+    color: var(--color-accent);
+}
+
+/* Status: Pending Payment (Orange) */
+.request-card[data-status="pending"] .request-accent {
+    background-color: #FF9800;
+}
+
+.request-card[data-status="pending"] .request-badge {
+    color: #FF9800;
+}
+
+/* Status: Completed (Green) */
+.request-card[data-status="completed"] .request-accent {
+    background-color: #4CAF50;
+}
+
+.request-card[data-status="completed"] .request-badge {
+    color: #4CAF50;
+}
+
+/* Status: Cancelled (Red) */
+.request-card[data-status="cancelled"] .request-accent {
+    background-color: #F44336;
+}
+
+.request-card[data-status="cancelled"] .request-badge {
+    color: #F44336;
+}
+
+.request-card[data-status="cancelled"] .request-title,
+.request-card[data-status="cancelled"] .request-meta {
+    opacity: 0.5;
+}
+
+/* Status: Expired (Gray) */
+.request-card[data-status="expired"] .request-accent {
+    background-color: #666666;
+}
+
+.request-card[data-status="expired"] .request-badge {
+    color: #666666;
+}
+
+.request-card[data-status="expired"] .request-title,
+.request-card[data-status="expired"] .request-meta {
+    opacity: 0.5;
+}
+
+/* Request Info */
+.request-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.request-title {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.request-meta {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Request Status */
+.request-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.request-badge {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: color var(--transition-fast);
+}
+
+.request-date {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+/* Request Action Arrow */
+.request-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    opacity: 0.3;
+    transition: opacity var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.request-action svg {
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-muted);
+}
+
+.request-card:hover .request-action,
+.request-card:active .request-action {
+    opacity: 0.6;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+.requests-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 48px 24px;
+    background-color: var(--color-bg-card);
+}
+
+.empty-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--color-text-muted);
+    opacity: 0.5;
+}
+
+.empty-title {
+    font-family: var(--font-family);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.empty-desc {
+    font-family: var(--font-family);
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+/* ========================================
+   REQUEST DETAIL MODAL - BASE STYLES
+   ======================================== */
+#requestDetailModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#requestDetailModal.active {
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#requestDetailModal .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+    transition: background-color 0.3s ease;
+}
+
+#requestDetailModal.active .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+#requestDetailModal.closing .modal-overlay {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#requestDetailModal .modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    max-height: 85vh;
+    background-color: var(--color-bg-card);
+    border-radius: 12px 12px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+    overflow: hidden;
+}
+
+#requestDetailModal.active .modal-content {
+    transform: translateY(0);
+}
+
+#requestDetailModal.closing .modal-content {
+    transform: translateY(100%);
+}
+
+/* Drag handle */
+#requestDetailModal .modal-drag-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    cursor: grab;
+    touch-action: none;
+    z-index: 10;
+}
+
+#requestDetailModal .modal-drag-handle::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+#requestDetailModal .modal-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Modal header */
+#requestDetailModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    padding-top: 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+}
+
+#requestDetailModal .modal-header:active {
+    cursor: grabbing;
+}
+
+#requestDetailModal .modal-header h3 {
+    font-family: var(--font-family);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+#requestDetailModal .modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity var(--transition-fast);
+}
+
+#requestDetailModal .modal-close:active {
+    opacity: 0.5;
+}
+
+#requestDetailModal .modal-close svg {
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-muted);
+}
+
+/* Modal body */
+.request-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    max-height: calc(85vh - 80px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.request-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    padding-top: 0;
+}
+
+.request-detail-status {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0;
+}
+
+.detail-badge {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+/* Detail badge status colors */
+.detail-badge.status-processing {
+    background-color: rgba(212, 175, 55, 0.15);
+    color: var(--color-accent);
+}
+
+.detail-badge.status-pending {
+    background-color: rgba(255, 152, 0, 0.15);
+    color: #FF9800;
+}
+
+.detail-badge.status-completed {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: #4CAF50;
+}
+
+.detail-badge.status-cancelled {
+    background-color: rgba(244, 67, 54, 0.15);
+    color: #F44336;
+}
+
+.detail-badge.status-expired {
+    background-color: rgba(102, 102, 102, 0.15);
+    color: #666666;
+}
+
+/* Detail Rows */
+.request-detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.request-detail-row:last-of-type {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-family: var(--font-family);
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.detail-value {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    text-align: right;
+}
+
+.detail-value.accent {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.detail-value.mono {
+    font-family: 'SF Mono', 'Monaco', monospace;
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+/* Detail Actions */
+.request-detail-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-cancel-request {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    background-color: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-cancel-request:active {
+    background-color: rgba(244, 67, 54, 0.2);
+}
+
+.btn-cancel-request svg {
+    width: 16px;
+    height: 16px;
+    color: #F44336;
+}
+
+.btn-cancel-request span {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #F44336;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filter-tabs {
+    animation: fadeInUp 0.3s ease forwards;
+}
+
+.requests-section {
+    animation: fadeInUp 0.3s ease 0.1s forwards;
+    opacity: 0;
+}
+
+/* Staggered card animation - removed duplicate, using styles from .request-card definition above */
+
+/* Processing status pulse animation */
+@keyframes statusPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.request-card[data-status="processing"] .request-badge,
+.request-card[data-status="pending"] .request-badge {
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+/* Card filtering transition */
+.request-card.hidden {
+    display: none;
+}
+
+.request-card.filtering {
+    animation: fadeOut 0.2s ease forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}

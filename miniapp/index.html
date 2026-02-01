@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NONAME EX - Crypto Exchange</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Exchange page styles will be loaded dynamically -->
+</head>
+<body>
+    <div class="app-container">
+        <!-- PAGE: Home -->
+        <div class="page page-home active" id="pageHome">
+            <!-- Invisible Top Header (for future text) -->
+            <div class="top-header" id="topHeader"></div>
+
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">NONAME EX</h1>
+            <p class="tagline">CRYPTO EXCHANGE</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Main Action Button -->
+            <button class="btn-main" data-action="buy-sell">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
+                </svg>
+                <span>КУПИТЬ / ПРОДАТЬ USDT</span>
+            </button>
+
+            <!-- Buttons Grid -->
+            <div class="buttons-grid">
+                <!-- Row 1 -->
+                <div class="btn-row">
+                    <button class="btn-secondary" data-action="rate">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 6l-9.5 9.5-5-5L1 18"/>
+                            <path d="M17 6h6v6"/>
+                        </svg>
+                        <span>КУРС</span>
+                    </button>
+                    <button class="btn-secondary" data-action="requests">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"/>
+                            <line x1="8" y1="12" x2="21" y2="12"/>
+                            <line x1="8" y1="18" x2="21" y2="18"/>
+                            <line x1="3" y1="6" x2="3.01" y2="6"/>
+                            <line x1="3" y1="12" x2="3.01" y2="12"/>
+                            <line x1="3" y1="18" x2="3.01" y2="18"/>
+                        </svg>
+                        <span>ВСЕ ЗАЯВКИ</span>
+                    </button>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="btn-row">
+                    <button class="btn-secondary" data-action="support">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+                            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+                        </svg>
+                        <span>ПОДДЕРЖКА</span>
+                    </button>
+                    <button class="btn-secondary" data-action="about">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <span>О НАС</span>
+                    </button>
+                </div>
+
+                <!-- AML Button -->
+                <button class="btn-secondary btn-full" data-action="aml">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="M9 12l2 2 4-4"/>
+                    </svg>
+                    <span>AML ПРОВЕРКА</span>
+                </button>
+
+                <!-- Referral Button -->
+                <button class="btn-secondary btn-full btn-outlined" data-action="referral">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span>РЕФЕРАЛЬНАЯ ПРОГРАММА</span>
+                </button>
+            </div>
+
+            <!-- Rate Section -->
+            <section class="rate-section">
+                <div class="section-header">
+                    <div class="accent-bar"></div>
+                    <span class="section-title">ТЕКУЩИЙ КУРС</span>
+                </div>
+                <div class="rate-cards-row">
+                    <div class="rate-card buy-card" data-action="rate-details">
+                        <div class="rate-label-wrap">
+                            <span class="rate-label">ПОКУПКА</span>
+                            <span class="rate-indicator indicator-green"></span>
+                        </div>
+                        <span class="rate-value" id="buyRateValue">&nbsp;</span>
+                        <span class="rate-currency">RUB</span>
+                    </div>
+                    <div class="rate-card sell-card" data-action="rate-details">
+                        <div class="rate-label-wrap">
+                            <span class="rate-label">ПРОДАЖА</span>
+                            <span class="rate-indicator indicator-red"></span>
+                        </div>
+                        <span class="rate-value" id="sellRateValue">&nbsp;</span>
+                        <span class="rate-currency">RUB</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+        </div>
+
+        <!-- PAGE: Exchange (loaded dynamically) -->
+        <div id="pageExchangeContainer"></div>
+
+        <!-- PAGE: Support (loaded dynamically) -->
+        <div id="pageSupportContainer"></div>
+
+        <!-- PAGE: About (loaded dynamically) -->
+        <div id="pageAboutContainer"></div>
+
+        <!-- PAGE: Requests (loaded dynamically) -->
+        <div id="pageRequestsContainer"></div>
+
+        <!-- PAGE: Rate (loaded dynamically) -->
+        <div id="pageRateContainer"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

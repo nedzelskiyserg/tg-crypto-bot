@@ -1,0 +1,689 @@
+/* ========================================
+   EXCHANGE PAGE STYLES
+   ======================================== */
+
+/* Exchange Header */
+.exchange-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 var(--spacing-3xl);
+    background-color: var(--color-bg);
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity var(--transition-fast);
+}
+
+.back-button:active {
+    opacity: 0.6;
+}
+
+.back-button .icon {
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-primary);
+}
+
+.exchange-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-text-primary);
+}
+
+.header-spacer {
+    width: 40px;
+}
+
+/* Exchange Content */
+.exchange-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px 28px;
+    padding-top: calc(97.92px + 24px);
+    padding-bottom: calc(56px + 24px + env(safe-area-inset-bottom, 0));
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Exchange Modes Container */
+.exchange-modes-container {
+    position: relative;
+    /*flex: 1;*/
+    min-height: 0;
+}
+
+/* Exchange Mode */
+.exchange-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, transform;
+}
+
+.exchange-mode-buy {
+    transform: translateX(-20px);
+}
+
+.exchange-mode-sell {
+    transform: translateX(20px);
+}
+
+.exchange-mode.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    position: relative;
+}
+
+/* Segmented Control */
+.segmented-control {
+    display: flex;
+    background-color: var(--color-bg-card);
+    height: 44px;
+    overflow: hidden;
+}
+
+.segment {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.segment span {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    transition: all var(--transition-fast);
+}
+
+.segment.active {
+    background-color: var(--color-accent);
+}
+
+.segment.active span {
+    font-weight: 600;
+    color: var(--color-bg);
+}
+
+.segment:not(.active):active {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Exchange Sections */
+.exchange-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* Amount Input Card */
+.amount-input-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 var(--spacing-xl);
+    background-color: var(--color-bg-card);
+    position: relative;
+    z-index: 1;
+}
+
+.amount-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-family);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--color-text-primary);
+    -webkit-appearance: none;
+    width: 100%;
+}
+
+.amount-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+/* Amount Currency Label */
+.amount-currency {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+/* Receive Card */
+.receive-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 var(--spacing-xl);
+    background-color: var(--color-bg-card);
+}
+
+.receive-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-family);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--color-accent);
+    -webkit-appearance: none;
+    width: 100%;
+}
+
+.receive-input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.5;
+}
+
+.receive-currency {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+/* Exchange Rate Info */
+.exchange-rate-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background-color: var(--color-bg-card);
+}
+
+.rate-info-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.icon-info {
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-muted);
+}
+
+.rate-info-left span {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+}
+
+.rate-info-value {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* Submit Button */
+.btn-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    height: 56px;
+    background-color: var(--color-accent);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0));
+    left: 28px;
+    right: 28px;
+    z-index: 200;
+    pointer-events: auto;
+}
+
+.btn-submit:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+.btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-submit .icon {
+    width: 20px;
+    height: 20px;
+    color: var(--color-bg);
+}
+
+.btn-submit span {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-bg);
+}
+
+/* ========================================
+   MODAL STYLES
+   ======================================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal.active {
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+    transition: background-color 0.3s ease;
+}
+
+.modal.active .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Closing animation for overlay */
+.modal.closing .modal-overlay {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--color-bg-card);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+    /* Allow scroll inside modal body */
+    overflow: hidden;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+/* Closing animation for content */
+.modal.closing .modal-content {
+    transform: translateY(100%);
+}
+
+/* Handle bar for drag indication */
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+/* Drag handle area - larger touch target */
+.modal-drag-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    cursor: grab;
+    touch-action: none;
+    z-index: 10;
+}
+
+.modal-drag-handle:active {
+    cursor: grabbing;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-xl);
+    padding-top: calc(var(--spacing-xl) + 8px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    /* Make header draggable */
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+}
+
+.modal-header:active {
+    cursor: grabbing;
+}
+
+.modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.modal-close svg {
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-muted);
+}
+
+.modal-body {
+    padding: var(--spacing-md);
+    max-height: 50vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.currency-option {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+}
+
+.currency-option::after {
+    content: '';
+    position: absolute;
+    right: var(--spacing-xl);
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-text-muted);
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+}
+
+.currency-option:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.currency-option:active {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.currency-option.selected {
+    background-color: rgba(212, 175, 55, 0.1);
+}
+
+.currency-option.selected::after {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    box-shadow: inset 0 0 0 3px var(--color-bg-card);
+}
+
+/* Just selected animation - pulse effect */
+.currency-option.just-selected {
+    animation: selectPulse 0.4s ease;
+}
+
+.currency-option.just-selected::after {
+    animation: checkmarkPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes selectPulse {
+    0% {
+        background-color: rgba(212, 175, 55, 0.1);
+    }
+    50% {
+        background-color: rgba(212, 175, 55, 0.25);
+    }
+    100% {
+        background-color: rgba(212, 175, 55, 0.1);
+    }
+}
+
+@keyframes checkmarkPop {
+    0% {
+        transform: scale(0.8);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.currency-option-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.currency-code {
+    font-family: var(--font-family);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    transition: color var(--transition-fast);
+}
+
+.currency-option.selected .currency-code {
+    color: var(--color-accent);
+}
+
+.currency-name {
+    font-family: var(--font-family);
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+/* ========================================
+   DATA SECTION
+   ======================================== */
+.data-section {
+    margin-top: 8px;
+}
+
+.data-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.input-field {
+    position: relative;
+}
+
+.text-input {
+    width: 100%;
+    height: 52px;
+    padding: 0 20px;
+    background-color: var(--color-bg-card);
+    border: none;
+    outline: none;
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    box-sizing: border-box;
+    transition: background-color var(--transition-fast);
+    -webkit-appearance: none;
+    border-radius: 0;
+}
+
+.text-input::placeholder {
+    color: #666666;
+    font-weight: 500;
+}
+
+.text-input:focus {
+    background-color: #1f1f1f;
+}
+
+.text-input:focus::placeholder {
+    color: #888888;
+}
+
+/* Add subtle separator between inputs */
+.input-field:not(:last-child) .text-input {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Valid state */
+.text-input.valid {
+    border-right: 3px solid var(--color-accent);
+}
+
+/* Invalid state */
+.text-input.invalid {
+    border-right: 3px solid #F44336;
+}
+
+/* ========================================
+   TERMS ROW
+   ======================================== */
+.terms-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 4px 0;
+}
+
+.terms-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-accent);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+}
+
+.terms-checkbox:active {
+    transform: scale(0.95);
+}
+
+.terms-checkbox .check-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--color-accent);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.terms-checkbox.checked {
+    background-color: transparent;
+}
+
+.terms-checkbox.checked .check-icon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.terms-text {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    padding-top: 4px;
+}
+
+/* Make terms text clickable */
+.terms-row {
+    cursor: pointer;
+}
+
+.terms-row:active .terms-checkbox {
+    transform: scale(0.95);
+}
+
+/* ========================================
+   SUBMIT BUTTON STATES
+   ======================================== */
+.btn-submit:disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.btn-submit:disabled:active {
+    transform: none;
+}
