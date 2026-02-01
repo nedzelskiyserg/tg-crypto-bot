@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Зависимости Python (увеличен таймаут для медленного доступа к PyPI)
+# Зависимости Python (зеркало PyPI — обход таймаутов pypi.org с серверов в РФ)
 COPY requirements.txt .
 ENV PIP_DEFAULT_TIMEOUT=300
+ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 RUN pip install --no-cache-dir --timeout 300 --retries 5 -r requirements.txt
 
 # Код: backend + miniapp (без лишнего через .dockerignore)
