@@ -32,73 +32,69 @@ function getApiBaseUrl() {
 let exchangeHandlerInstalled = false;
 
 /**
- * Format number with space as thousands separator and comma as decimal point
- * Example: 10000.5 -> "10 000,5"
+ * Format number: space as thousands separator, comma as decimal
+ * RUB: "10 000" or "10 000,5"; USDT: "127,82" (max 2 decimals)
  */
 function formatNumber(num) {
-    if (num === 0 || isNaN(num) || num === null || num === undefined) return '';
-    
-    // Round to 2 decimal places
+    if (num === null || num === undefined || isNaN(num)) return '';
+    if (num === 0) return '';
     const rounded = Math.round(num * 100) / 100;
     const parts = rounded.toString().split('.');
     const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     const decimalPart = parts[1] ? ',' + parts[1].substring(0, 2) : '';
-    
     return integerPart + decimalPart;
 }
 
 /**
- * Parse formatted number string to number
- * Handles spaces as thousands separator and comma as decimal point
- * Example: "10 000,5" -> 10000.5
+ * Parse formatted string to number
+ * "10 000,5" -> 10000.5; "127,82" -> 127.82
  */
 function parseFormattedNumber(str) {
-    if (!str || str.trim() === '') return 0;
-    
-    // Remove spaces (thousands separator) and replace comma with dot
+    if (!str || typeof str !== 'string') return 0;
     const cleaned = str.replace(/\s/g, '').replace(',', '.');
     const parsed = parseFloat(cleaned);
-    
     return isNaN(parsed) ? 0 : parsed;
 }
 
 /**
- * Format number while typing (real-time formatting)
- * Preserves cursor position
+ * Format number while typing with correct cursor restoration
+ * Counts "significant" chars (non-space: digits + comma) before cursor
  */
 function formatNumberWhileTyping(input, value) {
     const cursorPos = input.selectionStart;
     const beforeCursor = value.substring(0, cursorPos);
-    const afterCursor = value.substring(cursorPos);
-    
-    // Count non-space, non-comma characters before cursor
-    const charsBeforeCursor = beforeCursor.replace(/[\s,]/g, '').length;
-    
-    // Parse and format
+    const significantBefore = beforeCursor.replace(/\s/g, '');
+    const charsBeforeCursor = significantBefore.length;
+
     const num = parseFormattedNumber(value);
     const formatted = formatNumber(num);
-    
-    // Calculate new cursor position
-    let newCursorPos = 0;
+    if (formatted === '' && value.trim() === '') {
+        input.value = '';
+        return 0;
+    }
+    if (formatted === '') {
+        input.value = '';
+        return 0;
+    }
+
+    let newCursorPos = formatted.length;
     let charsCounted = 0;
-    
     for (let i = 0; i < formatted.length; i++) {
-        if (formatted[i] !== ' ' && formatted[i] !== ',') {
+        if (formatted[i] !== ' ') {
             charsCounted++;
-            if (charsCounted >= charsBeforeCursor) {
-                newCursorPos = i;
+            if (charsCounted === charsBeforeCursor) {
+                newCursorPos = i + 1;
                 break;
             }
         }
         newCursorPos = i + 1;
     }
-    
-    // Set value and restore cursor
+
     input.value = formatted;
     requestAnimationFrame(() => {
-        input.setSelectionRange(newCursorPos, newCursorPos);
+        const pos = Math.min(newCursorPos, formatted.length);
+        input.setSelectionRange(pos, pos);
     });
-    
     return num;
 }
 
@@ -269,39 +265,34 @@ function setupAmountInput() {
 
     amountInput.addEventListener('input', (e) => {
         if (isUpdating) return;
-        
-        // Allow digits, spaces, comma
         let value = e.target.value.replace(/[^\d\s,]/g, '');
-        
-        // Format while typing
+        const firstComma = value.indexOf(',');
+        if (firstComma >= 0) value = value.slice(0, firstComma + 1) + value.slice(firstComma + 1).replace(/,/g, '');
+
         const numValue = formatNumberWhileTyping(amountInput, value);
-        
+        window.exchangeState.amount = numValue;
         if (window.exchangeState.mode === 'buy') {
-            window.exchangeState.amount = numValue;
-            // Update receive value (USDT)
             updateReceiveValueFromAmount();
+        } else {
+            const rate = window.getSellRate ? window.getSellRate() : (window.getCurrentRate ? window.getCurrentRate() : 96.80);
+            if (rate > 0) {
+                window.exchangeState.receiveAmount = numValue * rate;
+                const receiveInput = document.getElementById('receiveValue');
+                if (receiveInput && document.activeElement !== receiveInput) {
+                    receiveInput.value = formatNumber(window.exchangeState.receiveAmount);
+                }
+            }
         }
-        
         validateForm();
     });
 
     amountInput.addEventListener('focus', () => {
-        const rawValue = window.exchangeState.amount;
-        if (rawValue > 0) {
-            // Show unformatted for editing
-            amountInput.value = rawValue.toString().replace('.', ',');
-        } else {
-            amountInput.value = '';
-        }
         hideSubmitButton();
     });
 
     amountInput.addEventListener('blur', () => {
-        if (window.exchangeState.amount > 0) {
-            amountInput.value = formatNumber(window.exchangeState.amount);
-        } else {
-            amountInput.value = '';
-        }
+        const val = window.exchangeState.amount || 0;
+        amountInput.value = val > 0 ? formatNumber(val) : '';
         showSubmitButton();
     });
 }
@@ -317,39 +308,35 @@ function setupReceiveInput() {
 
     receiveInput.addEventListener('input', (e) => {
         if (isUpdating) return;
-        
-        // Allow digits, spaces, comma
         let value = e.target.value.replace(/[^\d\s,]/g, '');
-        
-        // Format while typing
+        const firstComma = value.indexOf(',');
+        if (firstComma >= 0) value = value.slice(0, firstComma + 1) + value.slice(firstComma + 1).replace(/,/g, '');
+
         const numValue = formatNumberWhileTyping(receiveInput, value);
-        
         if (window.exchangeState.mode === 'buy') {
-            // Update amount (RUB) from receive value (USDT)
+            window.exchangeState.receiveAmount = numValue;
             updateAmountFromReceiveValue(numValue);
+        } else {
+            window.exchangeState.receiveAmount = numValue;
+            const rate = window.getSellRate ? window.getSellRate() : (window.getCurrentRate ? window.getCurrentRate() : 96.80);
+            if (rate > 0) {
+                window.exchangeState.amount = numValue / rate;
+                const amountInput = document.getElementById('amountInput');
+                if (amountInput && document.activeElement !== amountInput) {
+                    amountInput.value = formatNumber(window.exchangeState.amount);
+                }
+            }
         }
-        
         validateForm();
     });
 
     receiveInput.addEventListener('focus', () => {
-        const receiveValue = window.exchangeState.receiveAmount || 0;
-        if (receiveValue > 0) {
-            // Show unformatted for editing
-            receiveInput.value = receiveValue.toString().replace('.', ',');
-        } else {
-            receiveInput.value = '';
-        }
         hideSubmitButton();
     });
 
     receiveInput.addEventListener('blur', () => {
-        const receiveValue = window.exchangeState.receiveAmount || 0;
-        if (receiveValue > 0) {
-            receiveInput.value = formatNumber(receiveValue);
-        } else {
-            receiveInput.value = '';
-        }
+        const val = window.exchangeState.receiveAmount || 0;
+        receiveInput.value = val > 0 ? formatNumber(val) : '';
         showSubmitButton();
     });
 }
