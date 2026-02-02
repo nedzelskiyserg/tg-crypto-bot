@@ -399,9 +399,13 @@ function showRateDetails() {
 function initRateUpdates() {
     // Update rate immediately on load
     updateRate();
-    // Update rate every 30 seconds
-    setInterval(updateRate, 30000);
+    // Обновление курса раз в минуту
+    setInterval(updateRate, 60000);
 }
+
+// Лог ошибки курса не чаще раза в минуту
+let lastRateErrorLog = 0;
+const RATE_ERROR_LOG_INTERVAL = 60000;
 
 /**
  * Update rate from API
@@ -418,7 +422,12 @@ async function updateRate() {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const now = Date.now();
+            if (now - lastRateErrorLog > RATE_ERROR_LOG_INTERVAL) {
+                console.warn('Rate API unavailable (' + response.status + '), using cached rate');
+                lastRateErrorLog = now;
+            }
+            return;
         }
 
         const data = await response.json();
@@ -475,9 +484,11 @@ async function updateRate() {
             throw new Error('Invalid API response structure');
         }
     } catch (error) {
-        console.error('Failed to update rate from API:', error);
-        // Fallback: keep current rates or use defaults
-        // Don't update UI on error to avoid showing incorrect data
+        const now = Date.now();
+        if (now - lastRateErrorLog > RATE_ERROR_LOG_INTERVAL) {
+            console.warn('Failed to update rate from API:', error.message || error);
+            lastRateErrorLog = now;
+        }
     }
 }
 
