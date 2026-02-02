@@ -10,7 +10,7 @@
 ./scripts/setup_deploy.sh
 ```
 
-Скрипт создаёт каталог `data/`, при отсутствии копирует `.env.example` в `.env`, делает исполняемыми скрипты запуска. После этого отредактируйте `.env` (обязательно `BOT_TOKEN`) и запускайте приложение (см. ниже).
+Скрипт создаёт каталог `data/`, создаёт или обновляет `.env` из `.env.example` (скрипт `scripts/generate_env.sh` добавляет новые переменные, не перезаписывая существующие; Google и админы уже подставлены в примере). Отредактируйте `.env` (обязательно `BOT_TOKEN`) и запускайте приложение (см. ниже).
 
 ## Настройка сервера (один скрипт)
 
@@ -40,10 +40,10 @@
    ```
    Без аргумента домена Nginx-конфиг создастся с заглушкой `YOUR_DOMAIN` — потом подставите домен вручную.
 
-3. Проект уже будет склонирован в `/root/tg-crypto-bot` из GitHub. На сервере создайте `.env`, заполните `BOT_TOKEN`, запустите приложение:
+3. Проект уже будет склонирован в `/root/tg-crypto-bot` из GitHub. На сервере создайте `.env` из примера (Google и админы уже в примере), заполните `BOT_TOKEN`, запустите приложение:
    ```bash
-   cp /root/tg-crypto-bot/.env.example /root/tg-crypto-bot/.env
-   nano /root/tg-crypto-bot/.env   # BOT_TOKEN=... и CORS_ORIGINS=https://example.com
+   bash /root/tg-crypto-bot/scripts/generate_env.sh   # создать/обновить .env из .env.example
+   nano /root/tg-crypto-bot/.env   # BOT_TOKEN=... и при необходимости CORS_ORIGINS=https://example.com
    /root/tg-crypto-bot/deploy.sh
    ```
 
@@ -73,10 +73,12 @@
 
 ## 1. Переменные окружения
 
-Скопируйте пример и заполните:
+Один `.env` для инлайн-бота и Mini App (TMA). В `.env.example` уже подставлены Google-таблица и путь к credentials — достаточно заполнить `BOT_TOKEN` и при необходимости `CORS_ORIGINS`.
+
+Создать или обновить `.env` из примера (новые переменные добавляются, свои не перезаписываются):
 
 ```bash
-cp .env.example .env
+./scripts/generate_env.sh
 ```
 
 Обязательно:
@@ -85,13 +87,15 @@ cp .env.example .env
 |-------------|-----------------------------|
 | `BOT_TOKEN` | Токен бота от BotFather     |
 
+В примере уже заданы (та же таблица, что у инлайн-бота): `USE_GOOGLE_SHEETS`, `GOOGLE_SHEETS_ID`, `GOOGLE_CREDENTIALS_PATH`. Админы TMA берутся с листа **Settings** (ключ `admins`/`админы`).
+
 По желанию:
 
 | Переменная     | По умолчанию | Описание |
 |----------------|--------------|----------|
 | `DATABASE_URL` | SQLite в `data/app.db` | Строка подключения к БД |
 | `CORS_ORIGINS` | `*` | Разрешённые источники для API (через запятую), например `https://your-domain.com` |
-| `ADMINS_FILE`  | `backend/admins.xlsx` | Путь к Excel с ID админов |
+| `ADMINS_FILE`  | `backend/admins.xlsx` | Путь к Excel с ID админов (если Google Sheets не задан) |
 | `PUBLIC_URL`   | — | Публичный URL приложения (для логов/уведомлений) |
 
 ## 2. Запуск через Docker (рекомендуется)

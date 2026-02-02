@@ -27,6 +27,15 @@ if [ -z "$PYTHON" ] || ! command -v "$PYTHON" &>/dev/null; then
 fi
 echo "Используется: $PYTHON ($($PYTHON --version 2>&1))"
 
+# Пакет *-venv для создания виртуального окружения (Debian/Ubuntu)
+if [ ! -d "$VENV_DIR" ] && command -v apt-get &>/dev/null && [ "$(id -u)" -eq 0 ]; then
+  VENV_PKG="${PYTHON}-venv"
+  if ! dpkg -l "$VENV_PKG" &>/dev/null 2>/dev/null; then
+    echo "Установка $VENV_PKG..."
+    apt-get update -qq && apt-get install -y -qq "$VENV_PKG" || true
+  fi
+fi
+
 # venv
 if [ ! -d "$VENV_DIR" ]; then
   echo "Создание виртуального окружения..."
@@ -38,11 +47,15 @@ echo "Установка зависимостей (зеркало PyPI, тайм
   -i https://pypi.tuna.tsinghua.edu.cn/simple \
   -r requirements.txt
 
-# .env
-if [ ! -f "$APP_DIR/.env" ]; then
-  cp "$APP_DIR/.env.example" "$APP_DIR/.env"
-  echo "Создан .env — заполните BOT_TOKEN: nano $APP_DIR/.env"
+# .env: создать или обновить из .env.example (Google и админы уже в примере)
+if [ -f "$APP_DIR/scripts/generate_env.sh" ]; then
+  bash "$APP_DIR/scripts/generate_env.sh" 2>/dev/null || cp "$APP_DIR/.env.example" "$APP_DIR/.env"
+else
+  [ ! -f "$APP_DIR/.env" ] && cp "$APP_DIR/.env.example" "$APP_DIR/.env"
 fi
+
+# Каталог для SQLite (data/app.db)
+mkdir -p "$APP_DIR/data"
 
 echo "Запуск приложения на порту 8000..."
 exec "$VENV_DIR/bin/python" -m uvicorn backend.main:app --host 0.0.0.0 --port 8000

@@ -11,12 +11,12 @@ echo "Подготовка к выкладке TG CRYPTO BOT (TMA)..."
 mkdir -p data
 echo "  ✓ data/"
 
-# .env из примера, если нет
-if [ ! -f .env ]; then
-    cp .env.example .env
-    echo "  ✓ .env создан из .env.example — заполните BOT_TOKEN"
+# .env: создание или слияние с .env.example (новые переменные добавляются, свои не перезаписываются)
+if [ -f scripts/generate_env.sh ]; then
+    bash scripts/generate_env.sh
+    echo "  ✓ .env создан/обновлён из .env.example — заполните BOT_TOKEN при первом запуске"
 else
-    echo "  ✓ .env уже есть"
+    [ ! -f .env ] && cp .env.example .env && echo "  ✓ .env создан — заполните BOT_TOKEN"
 fi
 
 # Исполняемые скрипты
@@ -35,8 +35,9 @@ fi
 
 echo ""
 echo "Готово. Дальше:"
-echo "  1. Отредактируйте .env (обязательно BOT_TOKEN)."
+echo "  1. Отредактируйте .env (обязательно BOT_TOKEN; Google и админы уже из .env.example)."
 echo "  2. Запуск локально:  ./scripts/start_tma.sh"
 echo "  3. Или через Docker: docker compose -f docker-compose.tma.yml up -d"
-echo "  4. Подробно: docs/DEPLOY.md"
+echo "  4. Обновить .env из примера (добавить новые переменные): ./scripts/generate_env.sh"
+echo "  5. Подробно: docs/DEPLOY.md"
 echo ""

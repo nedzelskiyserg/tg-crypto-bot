@@ -40,7 +40,10 @@ class Settings:
         else ["*"]
     )
 
-    # Admin Excel file
+    # Admin source: Google Sheet (Settings sheet, key "admins"/"админы") — те же переменные, что у инлайн-бота (shared/config)
+    GOOGLE_SHEETS_ID: Optional[str] = os.getenv("GOOGLE_SHEETS_ID") or None
+    GOOGLE_CREDENTIALS_PATH: str = os.getenv("GOOGLE_CREDENTIALS_PATH", "credentials.json")
+    # Fallback: Excel file with column telegram_id (used if Google Sheets not configured)
     ADMINS_FILE: str = os.getenv("ADMINS_FILE", str(BACKEND_DIR / "admins.xlsx"))
 
     # Public URL (optional)

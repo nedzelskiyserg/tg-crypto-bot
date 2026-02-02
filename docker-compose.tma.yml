@@ -18,9 +18,14 @@ services:
       - BOT_TOKEN=${BOT_TOKEN}
       - DATABASE_URL=sqlite+aiosqlite:////app/data/app.db
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - GOOGLE_SHEETS_ID=${GOOGLE_SHEETS_ID:-}
+      - GOOGLE_CREDENTIALS_PATH=${GOOGLE_CREDENTIALS_PATH:-/app/credentials.json}
     volumes:
       - ./data:/app/data
+      # Админы из Excel (по умолчанию). Если используете Google таблицу (лист Settings) — закомментируйте и добавьте ниже credentials.json
       - ./admins.xlsx:/app/backend/admins.xlsx:ro
+      # Админы из Google таблицы: раскомментируйте, положите credentials.json в корень проекта, задайте GOOGLE_SHEETS_ID в .env
+      # - ./credentials.json:/app/credentials.json:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 30s
