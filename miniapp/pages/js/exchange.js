@@ -32,16 +32,31 @@ function getApiBaseUrl() {
 let exchangeHandlerInstalled = false;
 
 /**
- * Format number: space as thousands separator, comma as decimal
- * RUB: "10 000" or "10 000,5"; USDT: "127,82" (max 2 decimals)
+ * Format number with thousand separators (space) and decimal comma
+ * @param {number} num - Number to format
+ * @param {number} maxDecimals - Maximum decimal places (default 2)
+ * @returns {string} Formatted string like "10 000,50"
  */
-function formatNumber(num) {
+function formatNumber(num, maxDecimals = 2) {
     if (num === null || num === undefined || isNaN(num)) return '';
     if (num === 0) return '';
-    const rounded = Math.round(num * 100) / 100;
+
+    // Round to specified decimals
+    const multiplier = Math.pow(10, maxDecimals);
+    const rounded = Math.round(num * multiplier) / multiplier;
+
+    // Split into integer and decimal parts
     const parts = rounded.toString().split('.');
+
+    // Format integer part with space as thousands separator
     const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    const decimalPart = parts[1] ? ',' + parts[1].substring(0, 2) : '';
+
+    // Format decimal part (if exists)
+    let decimalPart = '';
+    if (parts[1]) {
+        decimalPart = ',' + parts[1].substring(0, maxDecimals);
+    }
+
     return integerPart + decimalPart;
 }
 
@@ -51,50 +66,107 @@ function formatNumber(num) {
  */
 function parseFormattedNumber(str) {
     if (!str || typeof str !== 'string') return 0;
+    // Remove all spaces, replace comma with dot
     const cleaned = str.replace(/\s/g, '').replace(',', '.');
     const parsed = parseFloat(cleaned);
     return isNaN(parsed) ? 0 : parsed;
 }
 
 /**
- * Format number while typing with correct cursor restoration
- * Counts "significant" chars (non-space: digits + comma) before cursor
+ * Sanitize input value - only digits, one comma, and spaces
+ * @param {string} value - Raw input value
+ * @returns {string} Sanitized value
  */
-function formatNumberWhileTyping(input, value) {
-    const cursorPos = input.selectionStart;
-    const beforeCursor = value.substring(0, cursorPos);
-    const significantBefore = beforeCursor.replace(/\s/g, '');
-    const charsBeforeCursor = significantBefore.length;
+function sanitizeNumericInput(value) {
+    // Remove all non-digit, non-comma, non-space characters
+    let sanitized = value.replace(/[^\d\s,]/g, '');
 
-    const num = parseFormattedNumber(value);
-    const formatted = formatNumber(num);
-    if (formatted === '' && value.trim() === '') {
-        input.value = '';
-        return 0;
-    }
-    if (formatted === '') {
-        input.value = '';
-        return 0;
+    // Keep only first comma
+    const firstComma = sanitized.indexOf(',');
+    if (firstComma >= 0) {
+        sanitized = sanitized.slice(0, firstComma + 1) +
+                    sanitized.slice(firstComma + 1).replace(/,/g, '');
     }
 
-    let newCursorPos = formatted.length;
-    let charsCounted = 0;
-    for (let i = 0; i < formatted.length; i++) {
-        if (formatted[i] !== ' ') {
-            charsCounted++;
-            if (charsCounted === charsBeforeCursor) {
-                newCursorPos = i + 1;
-                break;
-            }
+    // Limit decimal places to 2
+    const commaPos = sanitized.indexOf(',');
+    if (commaPos >= 0) {
+        const afterComma = sanitized.slice(commaPos + 1).replace(/\s/g, '');
+        if (afterComma.length > 2) {
+            sanitized = sanitized.slice(0, commaPos + 1) + afterComma.slice(0, 2);
         }
-        newCursorPos = i + 1;
     }
 
+    return sanitized;
+}
+
+/**
+ * Format input value while preserving cursor position
+ * Uses "significant characters after cursor" method for reliable cursor placement
+ * @param {HTMLInputElement} input - Input element
+ * @param {string} rawValue - Raw input value (after sanitization)
+ * @returns {number} Parsed numeric value
+ */
+function formatInputWithCursor(input, rawValue) {
+    const cursorPos = input.selectionStart;
+
+    // Count significant chars (digits and comma) AFTER cursor
+    const afterCursor = rawValue.substring(cursorPos);
+    const significantAfter = (afterCursor.match(/[\d,]/g) || []).length;
+
+    // Check if user is typing comma (comma at end with no digits after)
+    const isTypingComma = rawValue.endsWith(',') &&
+                          rawValue.indexOf(',') === rawValue.length - 1;
+
+    // Parse the number
+    const num = parseFormattedNumber(rawValue);
+
+    // Handle empty or zero case
+    if (num === 0 && !rawValue.match(/\d/)) {
+        input.value = '';
+        return 0;
+    }
+
+    // Format the number
+    let formatted = formatNumber(num);
+
+    // If user just typed comma, preserve it
+    if (isTypingComma && formatted && !formatted.includes(',')) {
+        formatted += ',';
+    }
+
+    // Handle case when input becomes empty
+    if (!formatted) {
+        input.value = '';
+        return 0;
+    }
+
+    // Calculate new cursor position
+    // Count backwards from end to find position with same significant chars after
+    let newCursorPos = formatted.length;
+    let significantCount = 0;
+
+    for (let i = formatted.length - 1; i >= 0; i--) {
+        if (/[\d,]/.test(formatted[i])) {
+            significantCount++;
+        }
+        if (significantCount === significantAfter) {
+            newCursorPos = i;
+            break;
+        }
+    }
+
+    // If we need more significant chars than exist, cursor goes to start
+    if (significantCount < significantAfter) {
+        newCursorPos = 0;
+    }
+
+    // Update input
     input.value = formatted;
-    requestAnimationFrame(() => {
-        const pos = Math.min(newCursorPos, formatted.length);
-        input.setSelectionRange(pos, pos);
-    });
+
+    // Set cursor position synchronously (not in RAF - causes flicker)
+    input.setSelectionRange(newCursorPos, newCursorPos);
+
     return num;
 }
 
@@ -261,16 +333,15 @@ function setupAmountInput() {
     const amountInput = document.getElementById('amountInput');
     if (!amountInput) return;
 
-    let isUpdating = false;
-
     amountInput.addEventListener('input', (e) => {
-        if (isUpdating) return;
-        let value = e.target.value.replace(/[^\d\s,]/g, '');
-        const firstComma = value.indexOf(',');
-        if (firstComma >= 0) value = value.slice(0, firstComma + 1) + value.slice(firstComma + 1).replace(/,/g, '');
+        // Sanitize input
+        const sanitized = sanitizeNumericInput(e.target.value);
 
-        const numValue = formatNumberWhileTyping(amountInput, value);
+        // Format with cursor preservation
+        const numValue = formatInputWithCursor(amountInput, sanitized);
         window.exchangeState.amount = numValue;
+
+        // Update the other input based on mode
         if (window.exchangeState.mode === 'buy') {
             updateReceiveValueFromAmount();
         } else {
@@ -292,7 +363,10 @@ function setupAmountInput() {
 
     amountInput.addEventListener('blur', () => {
         const val = window.exchangeState.amount || 0;
-        amountInput.value = val > 0 ? formatNumber(val) : '';
+        // Round to 2 decimals for display and sync state
+        const rounded = Math.round(val * 100) / 100;
+        window.exchangeState.amount = rounded;
+        amountInput.value = rounded > 0 ? formatNumber(rounded) : '';
         showSubmitButton();
     });
 }
@@ -304,15 +378,13 @@ function setupReceiveInput() {
     const receiveInput = document.getElementById('receiveValue');
     if (!receiveInput) return;
 
-    let isUpdating = false;
-
     receiveInput.addEventListener('input', (e) => {
-        if (isUpdating) return;
-        let value = e.target.value.replace(/[^\d\s,]/g, '');
-        const firstComma = value.indexOf(',');
-        if (firstComma >= 0) value = value.slice(0, firstComma + 1) + value.slice(firstComma + 1).replace(/,/g, '');
+        // Sanitize input
+        const sanitized = sanitizeNumericInput(e.target.value);
 
-        const numValue = formatNumberWhileTyping(receiveInput, value);
+        // Format with cursor preservation
+        const numValue = formatInputWithCursor(receiveInput, sanitized);
+
         if (window.exchangeState.mode === 'buy') {
             window.exchangeState.receiveAmount = numValue;
             updateAmountFromReceiveValue(numValue);
@@ -336,7 +408,10 @@ function setupReceiveInput() {
 
     receiveInput.addEventListener('blur', () => {
         const val = window.exchangeState.receiveAmount || 0;
-        receiveInput.value = val > 0 ? formatNumber(val) : '';
+        // Round to 2 decimals for display and sync state
+        const rounded = Math.round(val * 100) / 100;
+        window.exchangeState.receiveAmount = rounded;
+        receiveInput.value = rounded > 0 ? formatNumber(rounded) : '';
         showSubmitButton();
     });
 }
