@@ -198,6 +198,22 @@
     opacity: 0.9;
 }
 
+/* Status: Rejected (админ отклонил — приглушённый красный) */
+.request-card[data-status="rejected"] .request-accent {
+    background-color: #dc2626;
+}
+
+.request-card[data-status="rejected"] .request-badge {
+    color: #dc2626;
+}
+
+.request-card[data-status="rejected"] .request-title,
+.request-card[data-status="rejected"] .request-meta,
+.request-card[data-status="rejected"] .request-date {
+    color: #f87171;
+    opacity: 0.95;
+}
+
 /* Status: Expired (Gray) */
 .request-card[data-status="expired"] .request-accent {
     background-color: #666666;
@@ -516,6 +532,11 @@
 .detail-badge.status-cancelled {
     background-color: rgba(107, 114, 128, 0.2);
     color: #6b7280;
+}
+
+.detail-badge.status-rejected {
+    background-color: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
 }
 
 .detail-badge.status-expired {

@@ -52,11 +52,12 @@ const statusLabels = {
     expired: 'ИСТЕКЛО'
 };
 
-// Map backend status to frontend
+// Map backend status to frontend (cancelled = пользователь отменил, rejected = админ отклонил)
 function mapApiStatus(apiStatus) {
     if (apiStatus === 'pending') return 'processing';
     if (apiStatus === 'confirmed') return 'completed';
-    if (apiStatus === 'rejected' || apiStatus === 'cancelled') return 'cancelled';
+    if (apiStatus === 'cancelled') return 'cancelled';
+    if (apiStatus === 'rejected') return 'rejected';
     return 'processing';
 }
 
@@ -170,8 +171,8 @@ function renderOrdersList(orders) {
         processing: 'В ОБРАБОТКЕ',
         pending: 'ОЖИДАЕТ ОПЛАТЫ',
         completed: 'ПОДТВЕРЖДЕНО',
-        cancelled: 'ОТМЕНЕНО',
-        rejected: 'ОТКЛОНЕНО'
+        cancelled: 'ОТМЕНЕНО',   // пользователь отменил вручную
+        rejected: 'ОТКЛОНЕНО'    // админ отклонил
     };
 
     orders.forEach(function (req) {
@@ -449,10 +450,10 @@ function filterRequests(filter) {
 
     cards.forEach(card => {
         const status = card.dataset.status;
-        // Активные: в обработке или ожидает оплаты. Завершены: подтверждённые и отменённые.
+        // Активные: в обработке или ожидает оплаты. Завершены: подтверждённые, отменённые, отклонённые.
         let shouldShow = filter === 'all' ||
             (filter === 'active' && (status === 'processing' || status === 'pending')) ||
-            (filter === 'completed' && (status === 'completed' || status === 'cancelled'));
+            (filter === 'completed' && (status === 'completed' || status === 'cancelled' || status === 'rejected'));
 
         if (shouldShow) {
             card.classList.remove('hidden');
