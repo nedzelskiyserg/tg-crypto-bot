@@ -16,6 +16,18 @@
 
 На **новом сервере** (Ubuntu/Debian) можно один раз запустить скрипт — он установит Docker, Docker Compose, Nginx, Certbot и создаст каталог приложения и скрипты деплоя.
 
+### Вариант A: Cloud-init (при создании сервера)
+
+Если при создании VPS есть поле **Cloud-init** / **User data** (Timeweb Cloud, Selectel и др.):
+
+1. Откройте файл `scripts/cloud-init.yml` в проекте.
+2. Если нужен домен с первого запуска — раскомментируйте строку с `/tmp/server_setup.sh your-domain.ru` и подставьте свой домен; закомментируйте строку `- /tmp/server_setup.sh`.
+3. Скопируйте **весь** текст из `scripts/cloud-init.yml` и вставьте в поле Cloud-init в панели при создании сервера.
+4. Создайте сервер. При первом запуске скрипт установки выполнится сам (подождите 3–5 минут).
+5. Зайдите по SSH и проверьте: `ls /root/tg-crypto-bot`, затем создайте `.env` и запустите `deploy.sh` (см. шаги ниже).
+
+### Вариант B: Вручную (скрипт на уже созданный сервер)
+
 1. Скопируйте скрипт на сервер (из корня проекта):
    ```bash
    scp scripts/server_setup.sh user@ВАШ_СЕРВЕР:/tmp/
@@ -28,22 +40,30 @@
    ```
    Без аргумента домена Nginx-конфиг создастся с заглушкой `YOUR_DOMAIN` — потом подставите домен вручную.
 
-3. Загрузите проект в каталог `/opt/tg-crypto-bot` (по умолчанию):
+3. Проект уже будет склонирован в `/root/tg-crypto-bot` из GitHub. На сервере создайте `.env`, заполните `BOT_TOKEN`, запустите приложение:
    ```bash
-   rsync -avz --exclude .git --exclude .venv --exclude data ./ user@ВАШ_СЕРВЕР:/opt/tg-crypto-bot/
+   cp /root/tg-crypto-bot/.env.example /root/tg-crypto-bot/.env
+   nano /root/tg-crypto-bot/.env   # BOT_TOKEN=... и CORS_ORIGINS=https://example.com
+   /root/tg-crypto-bot/deploy.sh
    ```
 
-4. На сервере: создайте `.env`, заполните `BOT_TOKEN`, запустите приложение:
-   ```bash
-   sudo -u www-data cp /opt/tg-crypto-bot/.env.example /opt/tg-crypto-bot/.env
-   sudo -u www-data nano /opt/tg-crypto-bot/.env   # BOT_TOKEN=... и CORS_ORIGINS=https://example.com
-   sudo -u www-data /opt/tg-crypto-bot/deploy.sh
-   ```
+4. SSL: `certbot --nginx -d example.com`. В BotFather укажите URL Mini App: `https://example.com`.
 
-5. SSL: `certbot --nginx -d example.com`. В BotFather укажите URL Mini App: `https://example.com`.
+Обновление после изменений в GitHub: на сервере выполните `/root/tg-crypto-bot/update.sh` (скрипт сделает `git pull` и перезапустит приложение).
 
-Опционально: клонировать репозиторий с сервера вместо rsync — задайте переменные перед запуском:
-`REPO_URL=https://github.com/ваш/репо sudo bash /tmp/server_setup.sh example.com`
+## Настройка домена (DNS)
+
+Чтобы сайт открывался по домену, в панели регистратора (например Reg.ru) настройте DNS:
+
+| Тип | Имя | Значение |
+|-----|-----|----------|
+| A   | @   | IP вашего сервера (например 95.163.244.138) |
+| A   | www | тот же IP |
+| NS  | @   | ns1.reg.ru, ns2.reg.ru (или NS вашего регистратора) |
+
+После сохранения подождите 5–30 минут, пока записи обновятся. Проверка: `ping ваш-домен.ru` и `ping www.ваш-домен.ru` должны отвечать с IP сервера.
+
+На сервере запустите скрипт развёртки **с именем домена**: `sudo bash /tmp/server_setup.sh ваш-домен.ru`. Nginx будет обслуживать и `ваш-домен.ru`, и `www.ваш-домен.ru`. SSL для обоих выдаётся одной командой: `certbot --nginx -d ваш-домен.ru -d www.ваш-домен.ru`.
 
 ## Требования
 

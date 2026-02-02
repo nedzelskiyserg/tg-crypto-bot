@@ -1,7 +1,7 @@
 #!/bin/bash
 # Запуск приложения БЕЗ Docker (если сборка образа падает из‑за таймаутов PyPI)
 # На сервере: sudo bash scripts/run-without-docker.sh
-# Или: cd /opt/tg-crypto-bot && sudo -u www-data bash scripts/run-without-docker.sh
+# Или: cd /root/tg-crypto-bot && bash scripts/run-without-docker.sh
 
 set -e
 cd "$(dirname "$0")/.."
