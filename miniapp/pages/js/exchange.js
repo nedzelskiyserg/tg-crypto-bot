@@ -16,6 +16,7 @@ window.exchangeState = {
     phone: '+79001234567',
     email: 'test@example.com',
     wallet: 'TJYeasTPa6gpEEfYBzaFNj7aGCGvdMcsVc',
+    bankCard: '',  // Bank card for sell mode
     termsAccepted: true
 };
 
@@ -194,9 +195,14 @@ window.initExchangePage = function() {
             return;
         }
 
-        // Setup input handlers
+        // Setup input handlers for buy mode
         setupAmountInput();
         setupReceiveInput();
+        // Setup input handlers for sell mode
+        setupSellAmountInput();
+        setupSellReceiveInput();
+        setupBankCardInput();
+        // Setup common handlers
         setupDataInputs();
         setupTermsCheckbox();
         setupModalDrag();
@@ -439,16 +445,121 @@ function updateReceiveValueFromAmount() {
  */
 function updateAmountFromReceiveValue(receiveValue) {
     const rate = window.getBuyRate ? window.getBuyRate() : (window.getCurrentRate ? window.getCurrentRate() : 97.50);
-    
+
     if (rate <= 0) return;
-    
+
     const amount = receiveValue * rate;
     window.exchangeState.amount = amount;
-    
+
     const amountInput = document.getElementById('amountInput');
     if (amountInput && document.activeElement !== amountInput) {
         amountInput.value = formatNumber(amount);
     }
+}
+
+/**
+ * Setup sell mode amount input (USDT)
+ */
+function setupSellAmountInput() {
+    const amountInput = document.getElementById('amountInputSell');
+    if (!amountInput) return;
+
+    amountInput.addEventListener('input', (e) => {
+        const sanitized = sanitizeNumericInput(e.target.value);
+        const numValue = formatInputWithCursor(amountInput, sanitized);
+        window.exchangeState.amount = numValue;
+
+        // Calculate RUB receive amount
+        const rate = window.getSellRate ? window.getSellRate() : (window.getCurrentRate ? window.getCurrentRate() : 96.80);
+        if (rate > 0) {
+            window.exchangeState.receiveAmount = numValue * rate;
+            const receiveInput = document.getElementById('receiveValueSell');
+            if (receiveInput && document.activeElement !== receiveInput) {
+                receiveInput.value = formatNumber(window.exchangeState.receiveAmount);
+            }
+        }
+        validateForm();
+    });
+
+    amountInput.addEventListener('focus', () => {
+        hideSubmitButton();
+    });
+
+    amountInput.addEventListener('blur', () => {
+        const val = window.exchangeState.amount || 0;
+        const rounded = Math.round(val * 100) / 100;
+        window.exchangeState.amount = rounded;
+        amountInput.value = rounded > 0 ? formatNumber(rounded) : '';
+        showSubmitButton();
+    });
+}
+
+/**
+ * Setup sell mode receive input (RUB)
+ */
+function setupSellReceiveInput() {
+    const receiveInput = document.getElementById('receiveValueSell');
+    if (!receiveInput) return;
+
+    receiveInput.addEventListener('input', (e) => {
+        const sanitized = sanitizeNumericInput(e.target.value);
+        const numValue = formatInputWithCursor(receiveInput, sanitized);
+        window.exchangeState.receiveAmount = numValue;
+
+        // Calculate USDT amount from RUB
+        const rate = window.getSellRate ? window.getSellRate() : (window.getCurrentRate ? window.getCurrentRate() : 96.80);
+        if (rate > 0) {
+            window.exchangeState.amount = numValue / rate;
+            const amountInput = document.getElementById('amountInputSell');
+            if (amountInput && document.activeElement !== amountInput) {
+                amountInput.value = formatNumber(window.exchangeState.amount);
+            }
+        }
+        validateForm();
+    });
+
+    receiveInput.addEventListener('focus', () => {
+        hideSubmitButton();
+    });
+
+    receiveInput.addEventListener('blur', () => {
+        const val = window.exchangeState.receiveAmount || 0;
+        const rounded = Math.round(val * 100) / 100;
+        window.exchangeState.receiveAmount = rounded;
+        receiveInput.value = rounded > 0 ? formatNumber(rounded) : '';
+        showSubmitButton();
+    });
+}
+
+/**
+ * Setup bank card input for sell mode
+ */
+function setupBankCardInput() {
+    const bankCardInput = document.getElementById('bankCardInputSell');
+    if (!bankCardInput) return;
+
+    bankCardInput.addEventListener('input', (e) => {
+        // Format card number with spaces (4 digits groups)
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 16) value = value.slice(0, 16);
+
+        // Add spaces every 4 digits
+        const formatted = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+        e.target.value = formatted;
+
+        window.exchangeState.bankCard = value;
+        validateInput(bankCardInput, 'bankCard');
+        validateForm();
+    });
+
+    bankCardInput.addEventListener('focus', () => {
+        hideSubmitButton();
+    });
+
+    bankCardInput.addEventListener('blur', () => {
+        validateInput(bankCardInput, 'bankCard');
+        showSubmitButton();
+    });
 }
 
 /**
@@ -581,6 +692,10 @@ function validateInput(input, field) {
         case 'wallet':
             isValid = value.length === 34 && value.startsWith('T');
             break;
+        case 'bankCard':
+            // Bank card: 16 digits
+            isValid = value.length === 16 && /^\d{16}$/.test(value);
+            break;
     }
 
     if (input) {
@@ -669,19 +784,21 @@ function validateForm() {
 
     const s = window.exchangeState;
 
-    // For sell mode, wallet is not required
-    const walletValid = s.mode === 'sell' ? true : s.wallet.length === 34;
+    // Buy mode: wallet required; Sell mode: bankCard required
+    const walletValid = s.mode === 'buy' ? (s.wallet.length === 34 && s.wallet.startsWith('T')) : true;
+    const bankCardValid = s.mode === 'sell' ? (s.bankCard.length === 16 && /^\d{16}$/.test(s.bankCard)) : true;
     const phoneValid = s.phone.length >= 10 && /^[\+]?[0-9\s\-\(\)]+$/.test(s.phone);
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email);
 
     const isValid =
-        (s.mode === 'sell' || s.amount > 0) &&
+        s.amount > 0 &&
         s.surname.length >= 2 &&
         s.name.length >= 2 &&
         s.patronymic.length >= 2 &&
         phoneValid &&
         emailValid &&
         walletValid &&
+        bankCardValid &&
         s.termsAccepted;
 
     submitBtn.disabled = !isValid;
@@ -935,6 +1052,7 @@ window.submitExchange = function() {
         else if (!window.exchangeState.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(window.exchangeState.email)) msg = 'Введите корректный email';
         else if (!window.exchangeState.termsAccepted) msg = 'Примите условия сервиса';
         else if (window.exchangeState.mode === 'buy' && window.exchangeState.wallet.length !== 34) msg = 'Введите адрес кошелька (34 символа)';
+        else if (window.exchangeState.mode === 'sell' && window.exchangeState.bankCard.length !== 16) msg = 'Введите номер карты (16 цифр)';
 
         if (tg) tg.showAlert(msg);
         else alert(msg);
@@ -942,7 +1060,9 @@ window.submitExchange = function() {
     }
 
     const s = window.exchangeState;
-    const rate = window.getCurrentRate ? window.getCurrentRate() : 97.50;
+    const rate = s.mode === 'buy'
+        ? (window.getBuyRate ? window.getBuyRate() : (window.getCurrentRate ? window.getCurrentRate() : 97.50))
+        : (window.getSellRate ? window.getSellRate() : (window.getCurrentRate ? window.getCurrentRate() : 96.80));
     const receiveValue = s.mode === 'buy' ? (s.amount / rate).toFixed(8) : (s.amount * rate).toFixed(2);
 
     const tg = window.Telegram?.WebApp;
@@ -958,14 +1078,18 @@ window.submitExchange = function() {
         currency_to: s.receiveCurrency,
         amount_to: parseFloat(receiveValue),
         exchange_rate: rate,
-        wallet_address: s.wallet || 'N/A'
+        wallet_address: s.mode === 'buy' ? s.wallet : '',
+        bank_card: s.mode === 'sell' ? s.bankCard : ''
     };
 
     console.log('[Exchange] Submit data:', apiData);
 
+    // Format card number for display (with spaces)
+    const formatCardDisplay = (card) => card.replace(/(\d{4})(?=\d)/g, '$1 ');
+
     const confirmMessage = s.mode === 'buy'
         ? `Покупка USDT\n\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\nКошелёк: ${s.wallet.slice(0,8)}...${s.wallet.slice(-4)}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`
-        : `Продажа USDT\n\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`;
+        : `Продажа USDT\n\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\nКарта: ${formatCardDisplay(s.bankCard)}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`;
 
     if (tg) {
         tg.showPopup({
@@ -1074,12 +1198,14 @@ function resetExchangeForm() {
     window.exchangeState.phone = '';
     window.exchangeState.email = '';
     window.exchangeState.wallet = '';
+    window.exchangeState.bankCard = '';
     window.exchangeState.termsAccepted = false;
 
     // Reset input fields
     const inputIds = [
         'surnameInput', 'nameInput', 'patronymicInput', 'phoneInput', 'emailInput', 'walletInput',
-        'surnameInputSell', 'nameInputSell', 'patronymicInputSell', 'phoneInputSell', 'emailInputSell'
+        'surnameInputSell', 'nameInputSell', 'patronymicInputSell', 'phoneInputSell', 'emailInputSell',
+        'bankCardInputSell', 'amountInputSell', 'receiveValueSell'
     ];
 
     inputIds.forEach(id => {

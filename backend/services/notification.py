@@ -9,20 +9,7 @@ from backend.services.admin_loader import load_admin_ids
 async def notify_admins_new_order(bot, order: Order, user: User) -> None:
     """
     Send notification about new order to all admins.
-
-    Message format (as specified):
-    Ордер #{order_id}
-    Имя пользователя в Telegram
-    (никнейм) : @{username}
-    Имя и Фамилия : {full_name}
-    Номер телефона : {phone}
-    Адрес электронной почты :
-    {email}
-    Что у меня есть (нета) : {currency_to}
-    Сколько нужно (монета ) : {amount_to}
-    Курс : {exchange_rate}
-    Кошелек для получения :
-    {wallet_address}
+    Supports both BUY (RUB -> USDT) and SELL (USDT -> RUB) modes.
     """
     admin_ids = load_admin_ids()
 
@@ -33,19 +20,43 @@ async def notify_admins_new_order(bot, order: Order, user: User) -> None:
     # Format username
     username_display = f"@{user.username}" if user.username else "не указан"
 
-    # Build message
-    message = f"""Ордер #{order.id}
-Имя пользователя в Telegram
-(никнейм) : {username_display}
-Имя и Фамилия : {order.full_name}
-Номер телефона : {order.phone}
-Адрес электронной почты :
-{order.email}
-Что у меня есть (нета) : {order.currency_from} {order.amount_from}
-Сколько нужно (монета ) : {order.currency_to} {order.amount_to}
-Курс : {order.exchange_rate}
-Кошелек для получения :
+    # Determine order type
+    is_buy = str(order.currency_from).upper() == "RUB"
+    order_type = "🟢 ПОКУПКА USDT" if is_buy else "🔴 ПРОДАЖА USDT"
+
+    # Build message based on order type
+    if is_buy:
+        # Buy mode: user sends RUB, receives USDT to wallet
+        message = f"""{order_type}
+Ордер #{order.id}
+
+👤 Пользователь: {username_display}
+📋 ФИО: {order.full_name}
+📞 Телефон: {order.phone}
+📧 Email: {order.email}
+
+💰 Отдаёт: {order.amount_from} {order.currency_from}
+💎 Получает: {order.amount_to} {order.currency_to}
+📊 Курс: 1 USDT = {order.exchange_rate} RUB
+
+🔐 Кошелёк TRC-20:
 {order.wallet_address}"""
+    else:
+        # Sell mode: user sends USDT, receives RUB to bank card
+        message = f"""{order_type}
+Ордер #{order.id}
+
+👤 Пользователь: {username_display}
+📋 ФИО: {order.full_name}
+📞 Телефон: {order.phone}
+📧 Email: {order.email}
+
+💎 Отдаёт: {order.amount_from} {order.currency_from}
+💰 Получает: {order.amount_to} {order.currency_to}
+📊 Курс: 1 USDT = {order.exchange_rate} RUB
+
+💳 Карта для получения:
+{order.bank_card or 'не указана'}"""
 
     # Create inline keyboard with Confirm/Reject buttons
     keyboard = InlineKeyboardMarkup(

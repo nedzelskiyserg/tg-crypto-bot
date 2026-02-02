@@ -42,8 +42,10 @@ class Order(Base):
     amount_to: Mapped[Decimal] = mapped_column(Numeric(20, 8), nullable=False)
     exchange_rate: Mapped[Decimal] = mapped_column(Numeric(20, 8), nullable=False)
 
-    # Wallet
-    wallet_address: Mapped[str] = mapped_column(String(255), nullable=False)
+    # Wallet for crypto (buy mode)
+    wallet_address: Mapped[str] = mapped_column(String(255), nullable=True, default="")
+    # Bank card for receiving RUB (sell mode)
+    bank_card: Mapped[str] = mapped_column(String(50), nullable=True, default="")
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(

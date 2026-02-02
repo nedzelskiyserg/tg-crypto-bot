@@ -18,7 +18,10 @@ class OrderCreate(BaseModel):
     amount_to: Decimal = Field(..., gt=0)
     exchange_rate: Decimal = Field(..., gt=0)
 
-    wallet_address: str = Field(..., min_length=10, max_length=255)
+    # Wallet address for crypto (buy mode) - optional for sell mode
+    wallet_address: str = Field(default="", max_length=255)
+    # Bank card number for receiving RUB (sell mode) - optional for buy mode
+    bank_card: str = Field(default="", max_length=50)
 
 
 class OrderResponse(BaseModel):
@@ -38,6 +41,7 @@ class OrderResponse(BaseModel):
     exchange_rate: Decimal
 
     wallet_address: str
+    bank_card: str | None = None
     created_at: datetime
 
     class Config:

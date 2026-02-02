@@ -133,7 +133,9 @@ function mapApiOrderToRequest(apiOrder) {
         status: mapApiStatus(apiOrder.status),
         date: dateStr,
         time: timeStr,
-        requestId: '#NE-' + (created.getFullYear()) + '-' + String(apiOrder.id).padStart(5, '0')
+        requestId: '#NE-' + (created.getFullYear()) + '-' + String(apiOrder.id).padStart(5, '0'),
+        walletAddress: apiOrder.wallet_address || '',
+        bankCard: apiOrder.bank_card || ''
     };
 }
 
@@ -544,6 +546,27 @@ function openRequestDetail(requestId) {
     setTextContent('modalRequestDate', `${request.date}, ${request.time}`);
     setTextContent('modalRequestId', request.requestId);
 
+    // Show wallet for buy orders, bank card for sell orders
+    const walletRow = document.getElementById('modalWalletRow');
+    const bankCardRow = document.getElementById('modalBankCardRow');
+
+    if (request.type === 'buy') {
+        // Buy order - show wallet
+        if (walletRow) {
+            walletRow.style.display = request.walletAddress ? '' : 'none';
+            setTextContent('modalRequestWallet', request.walletAddress || '');
+        }
+        if (bankCardRow) bankCardRow.style.display = 'none';
+    } else {
+        // Sell order - show bank card
+        if (bankCardRow) {
+            const cardFormatted = formatBankCard(request.bankCard);
+            bankCardRow.style.display = request.bankCard ? '' : 'none';
+            setTextContent('modalRequestBankCard', cardFormatted || '');
+        }
+        if (walletRow) walletRow.style.display = 'none';
+    }
+
     // Show/hide cancel button
     const actionsEl = document.getElementById('modalRequestActions');
     if (actionsEl) {
@@ -730,6 +753,17 @@ function setupModalDrag(modal) {
 
 function formatNumber(n) {
     return n.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+/**
+ * Format bank card number with spaces (1234 5678 9012 3456)
+ */
+function formatBankCard(card) {
+    if (!card) return '';
+    // Remove any non-digits
+    const digits = card.replace(/\D/g, '');
+    // Add space every 4 digits
+    return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
 // Expose logger for debugging from console: window.requestsLog = true to see extra details

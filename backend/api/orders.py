@@ -35,7 +35,8 @@ async def create_order(
         currency_to=order_data.currency_to,
         amount_to=order_data.amount_to,
         exchange_rate=order_data.exchange_rate,
-        wallet_address=order_data.wallet_address,
+        wallet_address=order_data.wallet_address or "",
+        bank_card=order_data.bank_card or "",
     )
 
     db.add(order)

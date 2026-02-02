@@ -92,6 +92,18 @@
                 <span class="detail-value mono" id="modalRequestId">#NE-2026-00123</span>
             </div>
 
+            <!-- Wallet (for buy orders) -->
+            <div class="request-detail-row" id="modalWalletRow" style="display: none;">
+                <span class="detail-label">Кошелёк TRC-20</span>
+                <span class="detail-value mono" id="modalRequestWallet"></span>
+            </div>
+
+            <!-- Bank card (for sell orders) -->
+            <div class="request-detail-row" id="modalBankCardRow" style="display: none;">
+                <span class="detail-label">Карта для получения</span>
+                <span class="detail-value mono" id="modalRequestBankCard"></span>
+            </div>
+
             <!-- Action buttons for active requests -->
             <div class="request-detail-actions" id="modalRequestActions" style="display: none;">
                 <button class="btn-cancel-request" id="btnCancelRequest">

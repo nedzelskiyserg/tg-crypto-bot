@@ -127,6 +127,35 @@
 
             <!-- Sell Mode -->
             <div class="exchange-mode exchange-mode-sell" id="sellModeContainer">
+                <!-- Amount Section (USDT) -->
+                <section class="exchange-section">
+                    <div class="section-header">
+                        <div class="accent-bar"></div>
+                        <span class="section-title">СУММА</span>
+                    </div>
+                    <div class="amount-input-card">
+                        <input type="text"
+                               class="amount-input"
+                               id="amountInputSell"
+                               value=""
+                               inputmode="decimal"
+                               placeholder="0">
+                        <span class="amount-currency">USDT</span>
+                    </div>
+                </section>
+
+                <!-- Receive Section (RUB) -->
+                <section class="exchange-section">
+                    <div class="receive-card">
+                        <input type="text"
+                               class="receive-input"
+                               id="receiveValueSell"
+                               inputmode="decimal"
+                               placeholder="0">
+                        <span class="receive-currency">RUB</span>
+                    </div>
+                </section>
+
                 <!-- Rate Info -->
                 <div class="exchange-rate-info">
                     <div class="rate-info-left">
@@ -181,6 +210,15 @@
                                    id="emailInputSell"
                                    placeholder="Email *"
                                    autocomplete="email">
+                        </div>
+                        <div class="input-field">
+                            <input type="text"
+                                   class="text-input"
+                                   id="bankCardInputSell"
+                                   placeholder="Номер карты для получения RUB *"
+                                   inputmode="numeric"
+                                   maxlength="19"
+                                   autocomplete="cc-number">
                         </div>
                     </div>
                 </section>
