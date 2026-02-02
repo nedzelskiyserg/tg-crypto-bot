@@ -32,6 +32,8 @@ const state = {
     buyRate: 97.50,
     sellRate: 96.80,
     rateChange: 0.5,
+    rateLoading: true,
+    rateLoadedOnce: false,
     isLoading: false,
     currentPage: 'home',
     exchange: {
@@ -407,12 +409,43 @@ function initRateUpdates() {
 let lastRateErrorLog = 0;
 const RATE_ERROR_LOG_INTERVAL = 60000;
 
+function getBackendApiBaseUrl() {
+    const config = window.BACKEND_API_CONFIG;
+    if (config && config.baseUrl) return config.baseUrl;
+    const origin = typeof window !== 'undefined' && window.location && window.location.origin ? window.location.origin : '';
+    if (origin && !/localhost|127\.0\.0\.1/.test(origin)) return origin + '/api';
+    return 'http://localhost:8000/api';
+}
+
+function setRateLoading(loading) {
+    state.rateLoading = loading;
+    const row = document.querySelector('.rate-cards-row');
+    if (row) {
+        if (loading) row.classList.add('rate-loading');
+        else row.classList.remove('rate-loading');
+    }
+}
+
+function applyRatesToUI() {
+    const buyRateValueEl = document.getElementById('buyRateValue');
+    const sellRateValueEl = document.getElementById('sellRateValue');
+    if (buyRateValueEl) buyRateValueEl.textContent = state.buyRate.toFixed(2);
+    if (sellRateValueEl) sellRateValueEl.textContent = state.sellRate.toFixed(2);
+    if (typeof window.updateRatesFromAPI === 'function') window.updateRatesFromAPI();
+    if (window.updateExchangeValues && state.currentPage === 'exchange') window.updateExchangeValues();
+}
+
 /**
- * Update rate from API
+ * Update rate from API (external first, on error — fallback to backend /api/rate from Settings)
  */
 async function updateRate() {
+    setRateLoading(true);
+
+    let data = null;
+    let response = null;
+
     try {
-        const response = await fetch(RATE_API_CONFIG.url, {
+        response = await fetch(RATE_API_CONFIG.url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -421,75 +454,56 @@ async function updateRate() {
             }
         });
 
-        if (!response.ok) {
+        if (response.ok) {
+            const json = await response.json();
+            if (json && typeof json.buy === 'number' && typeof json.sell === 'number') {
+                data = { buy: json.buy, sell: json.sell };
+            }
+        }
+        if (!data) {
             const now = Date.now();
             if (now - lastRateErrorLog > RATE_ERROR_LOG_INTERVAL) {
-                console.warn('Rate API unavailable (' + response.status + '), using cached rate');
+                console.warn('Rate API unavailable (' + (response ? response.status : 'error') + '), using fallback from Settings');
                 lastRateErrorLog = now;
             }
-            return;
-        }
-
-        const data = await response.json();
-
-        // Validate response structure
-        if (data && typeof data.buy === 'number' && typeof data.sell === 'number') {
-            // Store previous rates for change calculation
-            const previousBuyRate = state.buyRate;
-            const previousSellRate = state.sellRate;
-
-            // Update rates
-            state.buyRate = parseFloat(data.buy);
-            state.sellRate = parseFloat(data.sell);
-            state.currentRate = state.buyRate; // Use buy rate as current rate
-
-            // Update global variables (accessible from all pages)
-            window.globalBuyRate = state.buyRate;
-            window.globalSellRate = state.sellRate;
-
-            // Calculate rate change (based on buy rate)
-            if (previousBuyRate > 0) {
-                state.rateChange = Math.round((state.buyRate - previousBuyRate) * 100) / 100;
-            }
-
-            // Update UI - buy and sell rate cards (home page)
-            const buyRateValueEl = document.getElementById('buyRateValue');
-            const sellRateValueEl = document.getElementById('sellRateValue');
-
-            if (buyRateValueEl) {
-                buyRateValueEl.textContent = state.buyRate.toFixed(2);
-            }
-
-            if (sellRateValueEl) {
-                sellRateValueEl.textContent = state.sellRate.toFixed(2);
-            }
-
-            // Update rate page if open (trigger update function if exists)
-            // Also trigger update for all rate pages (they might be loaded but not active)
-            if (typeof window.updateRatesFromAPI === 'function') {
-                window.updateRatesFromAPI();
-            }
-
-            // Update exchange page if open
-            if (window.updateExchangeValues && state.currentPage === 'exchange') {
-                window.updateExchangeValues();
-            }
-
-            console.log('Rate updated from API:', {
-                buy: state.buyRate,
-                sell: state.sellRate,
-                change: state.rateChange
-            });
-        } else {
-            throw new Error('Invalid API response structure');
         }
     } catch (error) {
         const now = Date.now();
         if (now - lastRateErrorLog > RATE_ERROR_LOG_INTERVAL) {
-            console.warn('Failed to update rate from API:', error.message || error);
+            console.warn('Rate API failed:', error.message || error, '— using fallback from Settings');
             lastRateErrorLog = now;
         }
     }
+
+    if (!data) {
+        try {
+            const baseUrl = getBackendApiBaseUrl();
+            const fallbackResponse = await fetch(baseUrl + '/rate', { method: 'GET', headers: { 'Accept': 'application/json' } });
+            if (fallbackResponse.ok) {
+                const json = await fallbackResponse.json();
+                if (json && (typeof json.buy === 'number' || json.buy != null) && (typeof json.sell === 'number' || json.sell != null)) {
+                    data = { buy: parseFloat(json.buy), sell: parseFloat(json.sell) };
+                }
+            }
+        } catch (fallbackError) {
+            console.warn('Fallback rate API failed:', fallbackError?.message || fallbackError);
+        }
+    }
+
+    if (data) {
+        const previousBuyRate = state.buyRate;
+        state.buyRate = parseFloat(data.buy);
+        state.sellRate = parseFloat(data.sell);
+        state.currentRate = state.buyRate;
+        window.globalBuyRate = state.buyRate;
+        window.globalSellRate = state.sellRate;
+        if (previousBuyRate > 0) {
+            state.rateChange = Math.round((state.buyRate - previousBuyRate) * 100) / 100;
+        }
+        state.rateLoadedOnce = true;
+    }
+    applyRatesToUI();
+    setRateLoading(false);
 }
 
 /**

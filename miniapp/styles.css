@@ -361,6 +361,38 @@ body {
     color: var(--color-accent);
 }
 
+/* Rate cards loading state — skeleton shimmer */
+.rate-cards-row.rate-loading .rate-value {
+    color: transparent;
+    min-width: 72px;
+    min-height: 42px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.rate-cards-row.rate-loading .rate-value::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        105deg,
+        transparent 0%,
+        transparent 40%,
+        rgba(255, 255, 255, 0.08) 50%,
+        transparent 60%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: rateShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes rateShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 /* Loading States */
 .btn-loading {
     pointer-events: none;

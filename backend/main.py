@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.config import settings, MINIAPP_DIR
 from backend.database import create_tables
-from backend.api import orders_router, users_router
+from backend.api import orders_router, rate_router, users_router
 from backend.bot.bot import init_bot
 
 
@@ -61,6 +61,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(orders_router, prefix=settings.API_PREFIX)
+app.include_router(rate_router, prefix=settings.API_PREFIX)
 app.include_router(users_router, prefix=settings.API_PREFIX)
 
 
