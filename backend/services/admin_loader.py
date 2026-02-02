@@ -100,5 +100,12 @@ def load_admin_ids() -> list[int]:
     if settings.GOOGLE_SHEETS_ID and os.path.isfile(credentials_path):
         ids = _load_admin_ids_from_google_sheets()
         if ids:
+            print(f"Admins loaded from Google Sheet (Settings): {ids}")
             return ids
-    return _load_admin_ids_from_file()
+        print("Admins from Google Sheet: none or error, falling back to Excel")
+    else:
+        print("Google Sheet not configured (GOOGLE_SHEETS_ID or credentials.json missing), using Excel")
+    ids = _load_admin_ids_from_file()
+    if ids:
+        print(f"Admins loaded from file: {ids}")
+    return ids

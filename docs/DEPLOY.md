@@ -100,6 +100,8 @@
 
 ## 2. Запуск через Docker (рекомендуется)
 
+**Если при сборке ошибка `429 Too Many Requests` (лимит Docker Hub):** залогиньтесь в Docker Hub — лимит для авторизованных выше. На сервере выполните `docker login` (логин/пароль с [hub.docker.com](https://hub.docker.com)), затем снова `docker compose ... up -d --build`. Либо запускайте без Docker: `./scripts/run-without-docker.sh`.
+
 ```bash
 # Сборка и запуск
 docker compose -f docker-compose.tma.yml up -d

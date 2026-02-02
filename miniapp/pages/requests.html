@@ -25,101 +25,11 @@
                     <div class="accent-bar"></div>
                     <span class="section-title">ИСТОРИЯ</span>
                 </div>
-                <span class="requests-count" id="requestsCount">5</span>
+                <span class="requests-count" id="requestsCount">0</span>
             </div>
 
-            <!-- Requests List -->
-            <div class="requests-list" id="requestsList">
-                <!-- Request Card - Processing -->
-                <div class="request-card" data-status="processing" data-id="1">
-                    <div class="request-accent"></div>
-                    <div class="request-info">
-                        <span class="request-title">Покупка USDT</span>
-                        <span class="request-meta">25,000 RUB → 256.41 USDT</span>
-                    </div>
-                    <div class="request-status">
-                        <span class="request-badge">В ОБРАБОТКЕ</span>
-                        <span class="request-date">30.01.2026</span>
-                    </div>
-                    <button class="request-action" data-action="view-request">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Request Card - Pending Payment -->
-                <div class="request-card" data-status="pending" data-id="2">
-                    <div class="request-accent"></div>
-                    <div class="request-info">
-                        <span class="request-title">Продажа USDT</span>
-                        <span class="request-meta">100 USDT → 9,750 RUB</span>
-                    </div>
-                    <div class="request-status">
-                        <span class="request-badge">ОЖИДАЕТ ОПЛАТЫ</span>
-                        <span class="request-date">30.01.2026</span>
-                    </div>
-                    <button class="request-action" data-action="view-request">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Request Card - Completed -->
-                <div class="request-card" data-status="completed" data-id="3">
-                    <div class="request-accent"></div>
-                    <div class="request-info">
-                        <span class="request-title">Покупка USDT</span>
-                        <span class="request-meta">10,000 RUB → 102.56 USDT</span>
-                    </div>
-                    <div class="request-status">
-                        <span class="request-badge">ЗАВЕРШЕНО</span>
-                        <span class="request-date">29.01.2026</span>
-                    </div>
-                    <button class="request-action" data-action="view-request">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Request Card - Cancelled -->
-                <div class="request-card" data-status="cancelled" data-id="4">
-                    <div class="request-accent"></div>
-                    <div class="request-info">
-                        <span class="request-title">Покупка USDT</span>
-                        <span class="request-meta">5,000 RUB → 51.28 USDT</span>
-                    </div>
-                    <div class="request-status">
-                        <span class="request-badge">ОТМЕНЕНО</span>
-                        <span class="request-date">28.01.2026</span>
-                    </div>
-                    <button class="request-action" data-action="view-request">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Request Card - Completed -->
-                <div class="request-card" data-status="completed" data-id="5">
-                    <div class="request-accent"></div>
-                    <div class="request-info">
-                        <span class="request-title">Продажа USDT</span>
-                        <span class="request-meta">50 USDT → 4,875 RUB</span>
-                    </div>
-                    <div class="request-status">
-                        <span class="request-badge">ЗАВЕРШЕНО</span>
-                        <span class="request-date">27.01.2026</span>
-                    </div>
-                    <button class="request-action" data-action="view-request">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
+            <!-- Requests List (filled by JS from API) -->
+            <div class="requests-list" id="requestsList"></div>
 
             <!-- Empty State -->
             <div class="requests-empty" id="requestsEmpty" style="display: none;">
