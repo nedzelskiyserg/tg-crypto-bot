@@ -807,11 +807,29 @@ function validateForm() {
  * Set exchange mode
  */
 function setExchangeMode(mode) {
+    const previousMode = window.exchangeState.mode;
     window.exchangeState.mode = mode;
 
     document.querySelectorAll('.segment').forEach(seg => {
         seg.classList.toggle('active', seg.dataset.segment === mode);
     });
+
+    // Reset amounts when switching modes
+    if (previousMode !== mode) {
+        window.exchangeState.amount = 0;
+        window.exchangeState.receiveAmount = 0;
+
+        // Clear amount inputs for both modes
+        const amountInputBuy = document.getElementById('amountInput');
+        const receiveInputBuy = document.getElementById('receiveValue');
+        const amountInputSell = document.getElementById('amountInputSell');
+        const receiveInputSell = document.getElementById('receiveValueSell');
+
+        if (amountInputBuy) amountInputBuy.value = '';
+        if (receiveInputBuy) receiveInputBuy.value = '';
+        if (amountInputSell) amountInputSell.value = '';
+        if (receiveInputSell) receiveInputSell.value = '';
+    }
 
     if (mode === 'buy') {
         window.exchangeState.currency = 'RUB';
