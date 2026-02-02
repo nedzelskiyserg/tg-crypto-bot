@@ -1,16 +1,38 @@
 /**
  * Requests Page Logic
- * Handles request filtering, viewing details, and actions.
  * Loads orders from API (GET /api/orders) for the current Telegram user.
+ *
+ * Логирование: все сообщения в консоли с префиксом [Requests].
+ * Как смотреть логи: откройте Mini App в браузере (URL из BotFather) и DevTools → Console;
+ * или Telegram Desktop → Mini App → правый клик → Inspect → Console.
  */
+
+const LOG_PREFIX = '[Requests]';
+
+function log(msg, data) {
+    if (data !== undefined) console.log(LOG_PREFIX, msg, data);
+    else console.log(LOG_PREFIX, msg);
+}
+function logWarn(msg, data) {
+    if (data !== undefined) console.warn(LOG_PREFIX, msg, data);
+    else console.warn(LOG_PREFIX, msg);
+}
+function logError(msg, err) {
+    console.error(LOG_PREFIX, msg, err != null ? err : '');
+    if (err && err.stack) console.error(LOG_PREFIX, 'stack:', err.stack);
+}
 
 // API base URL (same logic as exchange.js)
 function getApiBaseUrl() {
     const config = window.BACKEND_API_CONFIG;
-    if (config && config.baseUrl) return config.baseUrl;
+    if (config && config.baseUrl) {
+        log('getApiBaseUrl: from BACKEND_API_CONFIG', config.baseUrl);
+        return config.baseUrl;
+    }
     const origin = typeof window !== 'undefined' && window.location && window.location.origin ? window.location.origin : '';
-    if (origin && !/localhost|127\.0\.0\.1/.test(origin)) return origin + '/api';
-    return 'http://localhost:8000/api';
+    const url = origin && !/localhost|127\.0\.0\.1/.test(origin) ? origin + '/api' : 'http://localhost:8000/api';
+    log('getApiBaseUrl: origin=' + (origin || '(none)') + ' => url=' + url);
+    return url;
 }
 
 // Requests state (loaded from API)
@@ -39,12 +61,17 @@ function mapApiStatus(apiStatus) {
 }
 
 /**
- * Fetch user orders from API
+ * Fetch user orders from API.
+ * Returns { ok: true, data: [] } or { ok: false, error: string, status?: number }.
  */
 async function fetchOrdersFromApi() {
     const tg = window.Telegram?.WebApp;
     const initData = tg?.initData || '';
-    const url = getApiBaseUrl() + '/orders';
+    const baseUrl = getApiBaseUrl();
+    const url = baseUrl + '/orders';
+    log('fetchOrdersFromApi: start', { url: url, initDataLength: initData.length, hasTg: !!tg });
+    if (!initData) logWarn('initData is empty — API may return 401');
+
     try {
         const response = await fetch(url, {
             method: 'GET',
@@ -53,18 +80,32 @@ async function fetchOrdersFromApi() {
                 'X-Telegram-Init-Data': initData
             }
         });
+        const text = await response.text();
+        log('fetchOrdersFromApi: response', { status: response.status, ok: response.ok, bodyLength: (text || '').length });
+
         if (!response.ok) {
+            logError('fetchOrdersFromApi: HTTP error', { status: response.status, body: (text || '').slice(0, 200) });
             if (response.status === 401) {
-                console.warn('[Requests] Not authenticated');
-                return [];
+                return { ok: false, error: 'Не авторизован. Откройте Mini App из Telegram.', status: 401 };
             }
-            throw new Error('HTTP ' + response.status);
+            return { ok: false, error: 'Ошибка сервера: ' + response.status, status: response.status };
         }
-        const data = await response.json();
-        return Array.isArray(data) ? data : [];
+
+        let data;
+        try {
+            data = JSON.parse(text || '[]');
+        } catch (parseErr) {
+            logError('fetchOrdersFromApi: parse error', parseErr);
+            return { ok: false, error: 'Неверный ответ сервера' };
+        }
+        const arr = Array.isArray(data) ? data : [];
+        log('fetchOrdersFromApi: success', { count: arr.length, firstId: arr[0] ? arr[0].id : null });
+        return { ok: true, data: arr };
     } catch (e) {
-        console.error('[Requests] Failed to load orders:', e);
-        return [];
+        logError('fetchOrdersFromApi: network/exception', e);
+        const msg = (e && e.message) ? e.message : String(e);
+        const isNetwork = /fetch|network|failed|load/i.test(msg);
+        return { ok: false, error: isNetwork ? 'Нет связи с сервером. Проверьте интернет.' : msg };
     }
 }
 
@@ -99,15 +140,20 @@ function mapApiOrderToRequest(apiOrder) {
  * Render orders list in DOM
  */
 function renderOrdersList(orders) {
+    log('renderOrdersList: start', { count: orders.length });
     window.requestsState.requests = orders;
     window.requestsState.loaded = true;
 
     const listEl = document.getElementById('requestsList');
     const emptyEl = document.getElementById('requestsEmpty');
-    if (!listEl) return;
+    if (!listEl) {
+        logError('renderOrdersList: #requestsList not found');
+        return;
+    }
 
     listEl.innerHTML = '';
     if (orders.length === 0) {
+        log('renderOrdersList: empty list, show empty state');
         listEl.style.display = 'none';
         if (emptyEl) {
             emptyEl.style.display = 'flex';
@@ -155,6 +201,7 @@ function renderOrdersList(orders) {
     updateRequestsCount();
     filterRequests(window.requestsState.currentFilter);
     animateCardsOnLoad();
+    log('renderOrdersList: done', { cards: orders.length });
 }
 
 function formatRequestAmount(n) {
@@ -178,13 +225,13 @@ let globalHandlerInstalled = false;
  * Initialize Requests Page
  */
 window.initRequestsPage = function() {
-    console.log('[Requests] initRequestsPage called');
+    log('initRequestsPage: called');
 
     // Install global click handler once (captures all clicks early)
     if (!globalHandlerInstalled) {
         document.addEventListener('click', globalClickHandler, true); // capture phase
         globalHandlerInstalled = true;
-        console.log('[Requests] Global click handler installed');
+        log('initRequestsPage: global click handler installed');
     }
 
     // Wait for elements
@@ -194,12 +241,12 @@ window.initRequestsPage = function() {
         const requestsList = document.getElementById('requestsList');
 
         if (!pageRequests || !filterTabs || !requestsList) {
-            console.log('[Requests] Elements not ready, waiting...');
+            log('initRequestsPage: elements not ready', { pageRequests: !!pageRequests, filterTabs: !!filterTabs, requestsList: !!requestsList });
             setTimeout(waitForElements, 100);
             return;
         }
 
-        console.log('[Requests] All elements found');
+        log('initRequestsPage: all elements found');
 
         // Setup modal drag
         const modal = document.getElementById('requestDetailModal');
@@ -215,9 +262,9 @@ window.initRequestsPage = function() {
 };
 
 /**
- * Load orders from API and render list
+ * Show loading state in list area
  */
-async function loadAndRenderOrders() {
+function showRequestsLoading() {
     const listEl = document.getElementById('requestsList');
     const emptyEl = document.getElementById('requestsEmpty');
     if (listEl) {
@@ -225,11 +272,50 @@ async function loadAndRenderOrders() {
         listEl.style.display = '';
     }
     if (emptyEl) emptyEl.style.display = 'none';
+    log('showRequestsLoading');
+}
 
-    const apiOrders = await fetchOrdersFromApi();
+/**
+ * Show error state with message and retry button
+ */
+function showRequestsError(message, onRetry) {
+    const listEl = document.getElementById('requestsList');
+    const emptyEl = document.getElementById('requestsEmpty');
+    if (!listEl) return;
+    listEl.style.display = '';
+    emptyEl.style.display = 'none';
+    const retryBtn = onRetry
+        ? '<button type="button" class="requests-retry-btn" id="requestsRetryBtn" style="margin-top:1rem;padding:0.5rem 1rem;background:#333;color:#fff;border:none;border-radius:8px;cursor:pointer;">Повторить</button>'
+        : '';
+    listEl.innerHTML =
+        '<div class="requests-error" style="padding:2rem 1rem;text-align:center;color:#c00;">' +
+        '<div style="margin-bottom:0.5rem;">' + escapeHtml(message) + '</div>' +
+        retryBtn +
+        '</div>';
+    const btn = document.getElementById('requestsRetryBtn');
+    if (btn && onRetry) btn.addEventListener('click', onRetry);
+    log('showRequestsError', { message: message });
+}
+
+/**
+ * Load orders from API and render list (or show error)
+ */
+async function loadAndRenderOrders() {
+    log('loadAndRenderOrders: start');
+    showRequestsLoading();
+
+    const result = await fetchOrdersFromApi();
+    log('loadAndRenderOrders: fetch result', { ok: result.ok, dataLength: result.data ? result.data.length : 0, error: result.error });
+
+    if (!result.ok) {
+        showRequestsError(result.error || 'Не удалось загрузить заявки', loadAndRenderOrders);
+        return;
+    }
+
+    const apiOrders = result.data || [];
     const mapped = apiOrders.map(mapApiOrderToRequest);
+    log('loadAndRenderOrders: mapped', { count: mapped.length });
     renderOrdersList(mapped);
-    console.log('[Requests] Loaded', mapped.length, 'orders');
 }
 
 window.loadAndRenderOrders = loadAndRenderOrders;
@@ -265,7 +351,7 @@ function globalClickHandler(e) {
         e.stopImmediatePropagation();
 
         const filter = filterTab.dataset.filter;
-        console.log('[Requests] Filter clicked:', filter);
+        log('Filter clicked', filter);
 
         if (filter) {
             setFilter(filter);
@@ -282,7 +368,7 @@ function globalClickHandler(e) {
         e.stopImmediatePropagation();
 
         const requestId = parseInt(requestCard.dataset.id);
-        console.log('[Requests] Card clicked:', requestId);
+        log('Card clicked', requestId);
 
         if (requestId) {
             openRequestDetail(requestId);
@@ -297,7 +383,7 @@ function globalClickHandler(e) {
         e.stopPropagation();
         e.stopImmediatePropagation();
 
-        console.log('[Requests] Modal overlay clicked');
+        log('Modal overlay clicked');
         closeRequestModal();
         return;
     }
@@ -309,7 +395,7 @@ function globalClickHandler(e) {
         e.stopPropagation();
         e.stopImmediatePropagation();
 
-        console.log('[Requests] Modal close clicked');
+        log('Modal close clicked');
         closeRequestModal();
         return;
     }
@@ -321,7 +407,7 @@ function globalClickHandler(e) {
         e.stopPropagation();
         e.stopImmediatePropagation();
 
-        console.log('[Requests] Cancel request clicked');
+        log('Cancel request clicked');
         if (window.requestsState.selectedRequest) {
             cancelRequest(window.requestsState.selectedRequest);
         }
@@ -388,7 +474,7 @@ function filterRequests(filter) {
     if (emptyState) emptyState.style.display = visibleCount === 0 ? 'flex' : 'none';
     if (requestsList) requestsList.style.display = visibleCount === 0 ? 'none' : '';
 
-    console.log('[Requests] Filtered:', visibleCount, 'visible');
+    log('Filtered', { visibleCount: visibleCount });
 }
 
 /**
@@ -422,7 +508,7 @@ function updateRequestsCount() {
 function openRequestDetail(requestId) {
     const request = window.requestsState.requests.find(r => r.id === requestId);
     if (!request) {
-        console.error('[Requests] Request not found:', requestId);
+        logError('Request not found', requestId);
         return;
     }
 
@@ -430,7 +516,7 @@ function openRequestDetail(requestId) {
 
     const modal = document.getElementById('requestDetailModal');
     if (!modal) {
-        console.error('[Requests] Modal not found');
+        logError('Modal not found');
         return;
     }
 
@@ -467,7 +553,7 @@ function openRequestDetail(requestId) {
     document.body.style.overflow = 'hidden';
     requestAnimationFrame(() => modal.classList.add('active'));
 
-    console.log('[Requests] Modal opened for:', requestId);
+    log('Modal opened for', requestId);
 }
 
 function setTextContent(id, text) {
@@ -601,11 +687,13 @@ function setupModalDrag(modal) {
         area.addEventListener('touchend', onEnd, { passive: true });
     });
 
-    console.log('[Requests] Modal drag setup complete');
+    log('Modal drag setup complete');
 }
 
 function formatNumber(n) {
     return n.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
-console.log('[Requests] Script loaded');
+// Expose logger for debugging from console: window.requestsLog = true to see extra details
+window.requestsLog = window.requestsLog || false;
+log('Script loaded', { version: '3' });

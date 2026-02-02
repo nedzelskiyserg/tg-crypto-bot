@@ -679,7 +679,7 @@ async function loadRequestsPage() {
     if (!requestsScriptLoaded) {
         return new Promise((resolve) => {
             const script = document.createElement('script');
-            script.src = 'pages/js/requests.js?v=2';
+            script.src = 'pages/js/requests.js?v=3';
             script.onload = () => {
                 requestsScriptLoaded = true;
                 // Initialize requests page
