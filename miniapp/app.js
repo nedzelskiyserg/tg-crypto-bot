@@ -65,8 +65,15 @@ function initTelegramWebApp() {
     // Expand to full height
     tg.expand();
 
+    // Request fullscreen mode (available in Telegram WebApp 8.0+)
+    if (tg.requestFullscreen) {
+        tg.requestFullscreen();
+    }
+
     // Disable vertical swipes to prevent app from closing on scroll
-    tg.disableVerticalSwipes();
+    if (tg.disableVerticalSwipes) {
+        tg.disableVerticalSwipes();
+    }
 
     // Set header color
     tg.setHeaderColor('#111111');

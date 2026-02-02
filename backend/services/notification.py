@@ -1,9 +1,24 @@
 """Notification service - send notifications to admins"""
+from decimal import Decimal
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from backend.models.order import Order
 from backend.models.user import User
 from backend.services.admin_loader import load_admin_ids
+
+
+def format_amount(value: Decimal, decimals: int = 2) -> str:
+    """Format decimal amount nicely: 10000.50 -> '10 000,5' or 100.00 -> '100'"""
+    num = float(value)
+    rounded = round(num, decimals)
+
+    # Remove trailing zeros after decimal point
+    if rounded == int(rounded):
+        formatted = f"{int(rounded):,}".replace(",", " ")
+    else:
+        formatted = f"{rounded:,.{decimals}f}".replace(",", " ").replace(".", ",").rstrip("0").rstrip(",")
+
+    return formatted
 
 
 async def notify_admins_new_order(bot, order: Order, user: User) -> None:
@@ -24,39 +39,41 @@ async def notify_admins_new_order(bot, order: Order, user: User) -> None:
     is_buy = str(order.currency_from).upper() == "RUB"
     order_type = "🟢 ПОКУПКА USDT" if is_buy else "🔴 ПРОДАЖА USDT"
 
-    # Build message based on order type
+    # Format amounts
+    amount_from = format_amount(order.amount_from)
+    amount_to = format_amount(order.amount_to)
+    rate = format_amount(order.exchange_rate)
+
+    # Build message based on order type (HTML parse_mode for easy copy)
     if is_buy:
         # Buy mode: user sends RUB, receives USDT to wallet
         message = f"""{order_type}
 Ордер #{order.id}
 
 👤 Пользователь: {username_display}
-📋 ФИО: {order.full_name}
-📞 Телефон: {order.phone}
-📧 Email: {order.email}
+📋 ФИО: <code>{order.full_name}</code>
+📞 Телефон: <code>{order.phone}</code>
+📧 Email: <code>{order.email}</code>
 
-💰 Отдаёт: {order.amount_from} {order.currency_from}
-💎 Получает: {order.amount_to} {order.currency_to}
-📊 Курс: 1 USDT = {order.exchange_rate} RUB
+💰 Отдаёт: <code>{amount_from} {order.currency_from}</code>
+💎 Получает: <code>{amount_to} {order.currency_to}</code>
+📊 Курс: 1 USDT = {rate} RUB
 
 🔐 Кошелёк TRC-20:
-{order.wallet_address}"""
+<code>{order.wallet_address}</code>"""
     else:
-        # Sell mode: user sends USDT, receives RUB to bank card
+        # Sell mode: user sends USDT, receives RUB
         message = f"""{order_type}
 Ордер #{order.id}
 
 👤 Пользователь: {username_display}
-📋 ФИО: {order.full_name}
-📞 Телефон: {order.phone}
-📧 Email: {order.email}
+📋 ФИО: <code>{order.full_name}</code>
+📞 Телефон: <code>{order.phone}</code>
+📧 Email: <code>{order.email}</code>
 
-💎 Отдаёт: {order.amount_from} {order.currency_from}
-💰 Получает: {order.amount_to} {order.currency_to}
-📊 Курс: 1 USDT = {order.exchange_rate} RUB
-
-💳 Карта для получения:
-{order.bank_card or 'не указана'}"""
+💎 Отдаёт: <code>{amount_from} {order.currency_from}</code>
+💰 Получает: <code>{amount_to} {order.currency_to}</code>
+📊 Курс: 1 USDT = {rate} RUB"""
 
     # Create inline keyboard with Confirm/Reject buttons
     keyboard = InlineKeyboardMarkup(
@@ -80,6 +97,7 @@ async def notify_admins_new_order(bot, order: Order, user: User) -> None:
             await bot.send_message(
                 chat_id=admin_id,
                 text=message,
+                parse_mode="HTML",
                 reply_markup=keyboard
             )
         except Exception as e:

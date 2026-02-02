@@ -784,9 +784,8 @@ function validateForm() {
 
     const s = window.exchangeState;
 
-    // Buy mode: wallet required; Sell mode: bankCard required
+    // Buy mode: wallet required; Sell mode: no wallet needed
     const walletValid = s.mode === 'buy' ? (s.wallet.length === 34 && s.wallet.startsWith('T')) : true;
-    const bankCardValid = s.mode === 'sell' ? (s.bankCard.length === 16 && /^\d{16}$/.test(s.bankCard)) : true;
     const phoneValid = s.phone.length >= 10 && /^[\+]?[0-9\s\-\(\)]+$/.test(s.phone);
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email);
 
@@ -798,7 +797,6 @@ function validateForm() {
         phoneValid &&
         emailValid &&
         walletValid &&
-        bankCardValid &&
         s.termsAccepted;
 
     submitBtn.disabled = !isValid;
@@ -1052,7 +1050,6 @@ window.submitExchange = function() {
         else if (!window.exchangeState.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(window.exchangeState.email)) msg = 'Введите корректный email';
         else if (!window.exchangeState.termsAccepted) msg = 'Примите условия сервиса';
         else if (window.exchangeState.mode === 'buy' && window.exchangeState.wallet.length !== 34) msg = 'Введите адрес кошелька (34 символа)';
-        else if (window.exchangeState.mode === 'sell' && window.exchangeState.bankCard.length !== 16) msg = 'Введите номер карты (16 цифр)';
 
         if (tg) tg.showAlert(msg);
         else alert(msg);
@@ -1079,17 +1076,14 @@ window.submitExchange = function() {
         amount_to: parseFloat(receiveValue),
         exchange_rate: rate,
         wallet_address: s.mode === 'buy' ? s.wallet : '',
-        bank_card: s.mode === 'sell' ? s.bankCard : ''
+        bank_card: ''
     };
 
     console.log('[Exchange] Submit data:', apiData);
 
-    // Format card number for display (with spaces)
-    const formatCardDisplay = (card) => card.replace(/(\d{4})(?=\d)/g, '$1 ');
-
     const confirmMessage = s.mode === 'buy'
         ? `Покупка USDT\n\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\nКошелёк: ${s.wallet.slice(0,8)}...${s.wallet.slice(-4)}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`
-        : `Продажа USDT\n\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\nКарта: ${formatCardDisplay(s.bankCard)}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`;
+        : `Продажа USDT\n\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`;
 
     if (tg) {
         tg.showPopup({

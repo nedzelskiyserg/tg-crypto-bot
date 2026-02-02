@@ -546,25 +546,15 @@ function openRequestDetail(requestId) {
     setTextContent('modalRequestDate', `${request.date}, ${request.time}`);
     setTextContent('modalRequestId', request.requestId);
 
-    // Show wallet for buy orders, bank card for sell orders
+    // Show wallet for buy orders only
     const walletRow = document.getElementById('modalWalletRow');
-    const bankCardRow = document.getElementById('modalBankCardRow');
-
-    if (request.type === 'buy') {
-        // Buy order - show wallet
-        if (walletRow) {
-            walletRow.style.display = request.walletAddress ? '' : 'none';
-            setTextContent('modalRequestWallet', request.walletAddress || '');
+    if (walletRow) {
+        if (request.type === 'buy' && request.walletAddress) {
+            walletRow.style.display = '';
+            setTextContent('modalRequestWallet', request.walletAddress);
+        } else {
+            walletRow.style.display = 'none';
         }
-        if (bankCardRow) bankCardRow.style.display = 'none';
-    } else {
-        // Sell order - show bank card
-        if (bankCardRow) {
-            const cardFormatted = formatBankCard(request.bankCard);
-            bankCardRow.style.display = request.bankCard ? '' : 'none';
-            setTextContent('modalRequestBankCard', cardFormatted || '');
-        }
-        if (walletRow) walletRow.style.display = 'none';
     }
 
     // Show/hide cancel button
