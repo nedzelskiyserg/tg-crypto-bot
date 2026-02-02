@@ -1,12 +1,44 @@
 """
 Обработчик навигации по меню
 """
+import re
 from aiogram.types import CallbackQuery
 
 # Эти переменные будут установлены из bot/main.py
 CMS_INSTANCE = None
 MENU_KEYBOARD = None
 USE_GOOGLE_SHEETS = False
+
+
+async def process_dynamic_text(text: str) -> str:
+    """
+    Replace rate placeholders in text with actual values from API.
+    """
+    from bot.services.rates import get_rates, format_rate
+
+    buy_rate, sell_rate = await get_rates()
+
+    if buy_rate > 0:
+        buy_formatted = format_rate(buy_rate)
+        sell_formatted = format_rate(sell_rate) if sell_rate > 0 else format_rate(buy_rate)
+
+        text = text.replace("{buy_rate}", buy_formatted)
+        text = text.replace("{sell_rate}", sell_formatted)
+
+        text = re.sub(
+            r"(Купить\s+1\s+USDT\s*=\s*)\d+[,.]?\d*(\s*RUB)",
+            rf"\g<1>{buy_formatted}\g<2>",
+            text,
+            flags=re.IGNORECASE
+        )
+        text = re.sub(
+            r"(Продать\s+1\s+USDT\s*=\s*)\d+[,.]?\d*(\s*RUB)",
+            rf"\g<1>{sell_formatted}\g<2>",
+            text,
+            flags=re.IGNORECASE
+        )
+
+    return text
 
 async def menu_handler(callback: CallbackQuery) -> None:
     """Обработчик навигации по меню"""

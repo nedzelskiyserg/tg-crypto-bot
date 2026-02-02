@@ -1,12 +1,53 @@
 """
 Обработчик reply кнопок
 """
+import re
 from aiogram import types
 
 # Эти переменные будут установлены из bot/main.py
 CMS_INSTANCE = None
 MENU_KEYBOARD = None
 USE_GOOGLE_SHEETS = False
+
+
+async def process_dynamic_text(text: str) -> str:
+    """
+    Replace rate placeholders in text with actual values from API.
+    Supports:
+    - {buy_rate} and {sell_rate} placeholders
+    - Automatic replacement of "Купить 1 USDT = XX,XX RUB" patterns
+    """
+    from bot.services.rates import get_rates, format_rate
+
+    # Get rates from API
+    buy_rate, sell_rate = await get_rates()
+
+    # If API returned valid rates, replace in text
+    if buy_rate > 0:
+        buy_formatted = format_rate(buy_rate)
+        sell_formatted = format_rate(sell_rate) if sell_rate > 0 else format_rate(buy_rate)
+
+        # Replace placeholders
+        text = text.replace("{buy_rate}", buy_formatted)
+        text = text.replace("{sell_rate}", sell_formatted)
+
+        # Replace patterns like "Купить 1 USDT = XX,XX RUB"
+        text = re.sub(
+            r"(Купить\s+1\s+USDT\s*=\s*)\d+[,.]?\d*(\s*RUB)",
+            rf"\g<1>{buy_formatted}\g<2>",
+            text,
+            flags=re.IGNORECASE
+        )
+
+        # Replace patterns like "Продать 1 USDT = XX,XX RUB"
+        text = re.sub(
+            r"(Продать\s+1\s+USDT\s*=\s*)\d+[,.]?\d*(\s*RUB)",
+            rf"\g<1>{sell_formatted}\g<2>",
+            text,
+            flags=re.IGNORECASE
+        )
+
+    return text
 
 async def reply_button_handler(message: types.Message) -> None:
     """Обработчик reply кнопок (кнопок внизу экрана)"""
@@ -68,7 +109,8 @@ async def reply_button_handler(message: types.Message) -> None:
         # Если есть дочерний message, сразу отправляем его
         if child_message:
             # Выводим только текст из таблицы, без breadcrumbs
-            text = child_message.text
+            # Обрабатываем динамические плейсхолдеры (курсы)
+            text = await process_dynamic_text(child_message.text)
             
             # Получаем кнопки, привязанные к этому message (дочерние элементы message)
             from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -119,7 +161,8 @@ async def reply_button_handler(message: types.Message) -> None:
             if parent_item and parent_item.menu_type == "message":
                 # Если родитель - message, отправляем это сообщение
                 # Выводим только текст из таблицы, без breadcrumbs
-                text = parent_item.text
+                # Обрабатываем динамические плейсхолдеры (курсы)
+                text = await process_dynamic_text(parent_item.text)
                 
                 # Получаем кнопки, привязанные к этому message
                 keyboard = MENU_KEYBOARD.build_menu_keyboard(
