@@ -6,12 +6,16 @@ from backend.config import settings, BASE_DIR
 
 
 def _parse_float(value: str) -> Optional[float]:
-    """Parse string to float, return None if invalid."""
+    """Parse string to float (e.g. '76,00 ₽', '75,00 ₽', '76'), return None if invalid."""
     if not value:
         return None
+    s = str(value).strip()
+    s = s.replace("₽", "").replace("\u00a0", " ").strip()
+    # Оставляем только цифры, запятую и точку (и минус в начале)
+    s = "".join(c for c in s if c in "0123456789,.-")
+    s = s.replace(",", ".")
     try:
-        cleaned = str(value).strip().replace(",", ".")
-        return float(cleaned)
+        return float(s) if s else None
     except (ValueError, TypeError):
         return None
 
@@ -58,19 +62,26 @@ def _load_rates_from_google_sheets() -> Optional[tuple[float, float]]:
         for row in all_values:
             if len(row) < 2:
                 continue
-            key = str(row[0]).strip().lower() if row[0] else ""
-            value = str(row[1]).strip() if len(row) > 1 and row[1] else ""
-            if not key:
+            a = str(row[0]).strip() if row[0] else ""
+            b = str(row[1]).strip() if len(row) > 1 and row[1] else ""
+            # Ключ может быть в первой или второй колонке (BUY/SELL в A или в B)
+            key_a, key_b = a.lower(), b.lower()
+            if key_a in ("buy", "sell", "покупка", "продажа"):
+                key, value = key_a, b
+            elif key_b in ("buy", "sell", "покупка", "продажа"):
+                key, value = key_b, a
+            else:
                 continue
             parsed = _parse_float(value)
             if parsed is None:
                 continue
-            if key in ("buy", "покупка", "покупка usdt"):
+            if key in ("buy", "покупка"):
                 buy_val = parsed
-            elif key in ("sell", "продажа", "продажа usdt"):
+            elif key in ("sell", "продажа"):
                 sell_val = parsed
 
         if buy_val is not None and sell_val is not None:
+            print(f"Rates from Google Sheet Settings: buy={buy_val}, sell={sell_val}")
             return (float(buy_val), float(sell_val))
         return None
     except Exception as e:
