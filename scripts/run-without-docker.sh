@@ -11,13 +11,21 @@ VENV_DIR="$APP_DIR/.venv"
 
 echo "=== Запуск TG CRYPTO BOT без Docker ==="
 
-# Python 3.11
-if ! command -v python3.11 &>/dev/null; then
-  echo "Установка Python 3.11..."
-  apt-get update -qq && apt-get install -y -qq python3.11 python3.11-venv python3.11-dev python3-pip
+# Выбор Python: 3.12 → 3.11 → 3.10 → python3 (системный)
+if [ -z "$PYTHON" ]; then
+  for cand in python3.12 python3.11 python3.10 python3; do
+    if command -v "$cand" &>/dev/null; then
+      PYTHON="$cand"
+      break
+    fi
+  done
 fi
-
-PYTHON="${PYTHON:-python3.11}"
+if [ -z "$PYTHON" ] || ! command -v "$PYTHON" &>/dev/null; then
+  echo "Установка Python 3 (системный пакет)..."
+  apt-get update -qq && apt-get install -y -qq python3 python3-venv python3-dev python3-pip
+  PYTHON=python3
+fi
+echo "Используется: $PYTHON ($($PYTHON --version 2>&1))"
 
 # venv
 if [ ! -d "$VENV_DIR" ]; then
