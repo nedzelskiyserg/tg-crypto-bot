@@ -106,6 +106,8 @@
         // Карточка «Покупка» = sell, карточка «Продажа» = buy
         const displayBuy = sellRate;
         const displaySell = buyRate;
+        
+        console.log('[RatePage] Update: GlobalBuy=', buyRate, 'GlobalSell=', sellRate, '-> DisplayBuy=', displayBuy, 'DisplaySell=', displaySell);
 
         if (buyRateValue && sellRateValue) {
             const currentBuy = parseFloat(buyRateValue.textContent) || 0;

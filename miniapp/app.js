@@ -896,7 +896,7 @@ async function loadRatePage() {
     if (!rateStylesLoaded) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'pages/css/rate.css';
+        link.href = 'pages/css/rate.css?v=' + Date.now();
         document.head.appendChild(link);
         rateStylesLoaded = true;
     }
@@ -904,7 +904,7 @@ async function loadRatePage() {
     // Load HTML if not loaded
     if (!ratePageLoaded) {
         try {
-            const response = await fetch('pages/rate.html');
+            const response = await fetch('pages/rate.html?v=' + Date.now());
             const html = await response.text();
             container.innerHTML = html;
             ratePageLoaded = true;
@@ -918,7 +918,7 @@ async function loadRatePage() {
     if (!rateScriptLoaded) {
         return new Promise((resolve) => {
             const script = document.createElement('script');
-            script.src = 'pages/js/rate.js';
+            script.src = 'pages/js/rate.js?v=' + Date.now();
             script.onload = () => {
                 rateScriptLoaded = true;
                 // Initialize rate page
