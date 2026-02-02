@@ -19,30 +19,24 @@ async def process_dynamic_text(text: str) -> str:
     """
     from bot.services.rates import get_rates, format_rate
 
-    # Get rates from API
+    # Get rates from API (покупка/продажа поменяны местами: Купить = sell, Продать = buy)
     buy_rate, sell_rate = await get_rates()
 
-    # If API returned valid rates, replace in text
-    if buy_rate > 0:
-        buy_formatted = format_rate(buy_rate)
+    if buy_rate > 0 or sell_rate > 0:
+        buy_formatted = format_rate(buy_rate) if buy_rate > 0 else format_rate(sell_rate)
         sell_formatted = format_rate(sell_rate) if sell_rate > 0 else format_rate(buy_rate)
-
-        # Replace placeholders
-        text = text.replace("{buy_rate}", buy_formatted)
-        text = text.replace("{sell_rate}", sell_formatted)
-
-        # Replace patterns like "Купить 1 USDT = XX,XX RUB"
+        # Подставляем местами: в «Купить» — sell, в «Продать» — buy
+        text = text.replace("{buy_rate}", sell_formatted)
+        text = text.replace("{sell_rate}", buy_formatted)
         text = re.sub(
             r"(Купить\s+1\s+USDT\s*=\s*)\d+[,.]?\d*(\s*RUB)",
-            rf"\g<1>{buy_formatted}\g<2>",
+            rf"\g<1>{sell_formatted}\g<2>",
             text,
             flags=re.IGNORECASE
         )
-
-        # Replace patterns like "Продать 1 USDT = XX,XX RUB"
         text = re.sub(
             r"(Продать\s+1\s+USDT\s*=\s*)\d+[,.]?\d*(\s*RUB)",
-            rf"\g<1>{sell_formatted}\g<2>",
+            rf"\g<1>{buy_formatted}\g<2>",
             text,
             flags=re.IGNORECASE
         )

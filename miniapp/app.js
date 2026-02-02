@@ -436,8 +436,9 @@ function setRateLoading(loading) {
 function applyRatesToUI() {
     const buyRateValueEl = document.getElementById('buyRateValue');
     const sellRateValueEl = document.getElementById('sellRateValue');
-    if (buyRateValueEl) buyRateValueEl.textContent = state.buyRate.toFixed(2);
-    if (sellRateValueEl) sellRateValueEl.textContent = state.sellRate.toFixed(2);
+    // Покупка/продажа поменяны местами: карточка «Покупка» = sell, «Продажа» = buy
+    if (buyRateValueEl) buyRateValueEl.textContent = state.sellRate.toFixed(2);
+    if (sellRateValueEl) sellRateValueEl.textContent = state.buyRate.toFixed(2);
     if (typeof window.updateRatesFromAPI === 'function') window.updateRatesFromAPI();
     if (window.updateExchangeValues && state.currentPage === 'exchange') window.updateExchangeValues();
 }
@@ -987,15 +988,14 @@ function getCurrentRate() {
 /**
  * Get buy rate
  */
+/** Курс для режима «Покупка» (карточка ПОКУПКА) — берём sell из API */
 function getBuyRate() {
-    return state.buyRate || 97.50;
+    return state.sellRate || 96.80;
 }
 
-/**
- * Get sell rate
- */
+/** Курс для режима «Продажа» (карточка ПРОДАЖА) — берём buy из API */
 function getSellRate() {
-    return state.sellRate || 96.80;
+    return state.buyRate || 97.50;
 }
 
 /**

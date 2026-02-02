@@ -96,36 +96,29 @@
         }, 30000);
     }
 
-    // Update rates from API (using global variables)
+    // Update rates from API (using global variables). Покупка/продажа поменяны местами.
     function updateRatesFromAPI() {
-        // Get rates directly from global variables
-        // If not set yet, use placeholders or 0
         const buyRate = window.globalBuyRate || 0;
         const sellRate = window.globalSellRate || 0;
+        // Карточка «Покупка» = sell, карточка «Продажа» = buy
+        const displayBuy = sellRate;
+        const displaySell = buyRate;
 
-        // Update display with animation
         if (buyRateValue && sellRateValue) {
-            // Check if values actually changed to avoid unnecessary animation
             const currentBuy = parseFloat(buyRateValue.textContent) || 0;
             const currentSell = parseFloat(sellRateValue.textContent) || 0;
-            
-            // Only animate if we have valid rates and they changed
             const isValidRate = buyRate > 0 && sellRate > 0;
-            const hasChanged = isValidRate && (Math.abs(currentBuy - buyRate) > 0.01 || Math.abs(currentSell - sellRate) > 0.01);
+            const hasChanged = isValidRate && (Math.abs(currentBuy - displayBuy) > 0.01 || Math.abs(currentSell - displaySell) > 0.01);
 
-            // Always update values if we have them
             if (buyRateValue && isValidRate) {
-                buyRateValue.textContent = buyRate.toFixed(2);
+                buyRateValue.textContent = displayBuy.toFixed(2);
             } else if (buyRateValue && !isValidRate && buyRateValue.textContent.trim() === '') {
-                 // Show loader or placeholder if empty and no rate yet
-                 buyRateValue.textContent = '...';
+                buyRateValue.textContent = '...';
             }
-            
             if (sellRateValue && isValidRate) {
-                sellRateValue.textContent = sellRate.toFixed(2);
+                sellRateValue.textContent = displaySell.toFixed(2);
             } else if (sellRateValue && !isValidRate && sellRateValue.textContent.trim() === '') {
-                 // Show loader or placeholder if empty and no rate yet
-                 sellRateValue.textContent = '...';
+                sellRateValue.textContent = '...';
             }
 
             // Add animation only if values changed

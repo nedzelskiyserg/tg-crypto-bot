@@ -18,22 +18,21 @@ async def process_dynamic_text(text: str) -> str:
 
     buy_rate, sell_rate = await get_rates()
 
-    if buy_rate > 0:
-        buy_formatted = format_rate(buy_rate)
+    if buy_rate > 0 or sell_rate > 0:
+        buy_formatted = format_rate(buy_rate) if buy_rate > 0 else format_rate(sell_rate)
         sell_formatted = format_rate(sell_rate) if sell_rate > 0 else format_rate(buy_rate)
-
-        text = text.replace("{buy_rate}", buy_formatted)
-        text = text.replace("{sell_rate}", sell_formatted)
-
+        # Подставляем местами: в «Купить» — sell, в «Продать» — buy
+        text = text.replace("{buy_rate}", sell_formatted)
+        text = text.replace("{sell_rate}", buy_formatted)
         text = re.sub(
             r"(Купить\s+1\s+USDT\s*=\s*)\d+[,.]?\d*(\s*RUB)",
-            rf"\g<1>{buy_formatted}\g<2>",
+            rf"\g<1>{sell_formatted}\g<2>",
             text,
             flags=re.IGNORECASE
         )
         text = re.sub(
             r"(Продать\s+1\s+USDT\s*=\s*)\d+[,.]?\d*(\s*RUB)",
-            rf"\g<1>{sell_formatted}\g<2>",
+            rf"\g<1>{buy_formatted}\g<2>",
             text,
             flags=re.IGNORECASE
         )
