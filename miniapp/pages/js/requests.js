@@ -46,7 +46,7 @@ window.requestsState = {
 const statusLabels = {
     processing: 'В ОБРАБОТКЕ',
     pending: 'ОЖИДАЕТ ОПЛАТЫ',
-    completed: 'ЗАВЕРШЕНО',
+    completed: 'ПОДТВЕРЖДЕНО',
     cancelled: 'ОТМЕНЕНО',
     rejected: 'ОТКЛОНЕНО',
     expired: 'ИСТЕКЛО'
@@ -169,7 +169,7 @@ function renderOrdersList(orders) {
     const statusBadgeLabels = {
         processing: 'В ОБРАБОТКЕ',
         pending: 'ОЖИДАЕТ ОПЛАТЫ',
-        completed: 'ЗАВЕРШЕНО',
+        completed: 'ПОДТВЕРЖДЕНО',
         cancelled: 'ОТМЕНЕНО',
         rejected: 'ОТКЛОНЕНО'
     };
@@ -314,8 +314,16 @@ async function loadAndRenderOrders() {
 
     const apiOrders = result.data || [];
     const mapped = apiOrders.map(mapApiOrderToRequest);
-    log('loadAndRenderOrders: mapped', { count: mapped.length });
-    renderOrdersList(mapped);
+    // Убираем дубликаты по id (на случай повторов в ответе API)
+    const seenIds = new Set();
+    const unique = mapped.filter(function (r) {
+        if (seenIds.has(r.id)) return false;
+        seenIds.add(r.id);
+        return true;
+    });
+    if (unique.length !== mapped.length) logWarn('loadAndRenderOrders: removed duplicates', { was: mapped.length, now: unique.length });
+    log('loadAndRenderOrders: mapped', { count: unique.length });
+    renderOrdersList(unique);
 }
 
 window.loadAndRenderOrders = loadAndRenderOrders;
@@ -441,9 +449,10 @@ function filterRequests(filter) {
 
     cards.forEach(card => {
         const status = card.dataset.status;
+        // Активные: в обработке или ожидает оплаты. Завершены: подтверждённые и отменённые.
         let shouldShow = filter === 'all' ||
             (filter === 'active' && (status === 'processing' || status === 'pending')) ||
-            (filter === 'completed' && status === 'completed');
+            (filter === 'completed' && (status === 'completed' || status === 'cancelled'));
 
         if (shouldShow) {
             card.classList.remove('hidden');
