@@ -38,9 +38,11 @@ async def fetch_rates_from_api() -> Optional[Tuple[float, float]]:
     """
     global _cached_rates
     try:
+        # Тот же заголовок, что и в Mini App: access-token (не Authorization: Bearer)
         headers = {
-            "Authorization": f"Bearer {RATE_API_TOKEN}",
             "Accept": "application/json",
+            "Accept-Language": "ru",
+            "access-token": RATE_API_TOKEN,
         }
         async with aiohttp.ClientSession() as session:
             async with session.get(RATE_API_URL, headers=headers, timeout=10) as response:
