@@ -14,6 +14,7 @@ class OrderStatus(str, Enum):
     pending = "pending"
     confirmed = "confirmed"
     rejected = "rejected"
+    cancelled = "cancelled"  # отменено пользователем вручную
 
 
 class Order(Base):

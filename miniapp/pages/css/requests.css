@@ -182,18 +182,20 @@
     color: #4CAF50;
 }
 
-/* Status: Cancelled (Red) */
+/* Status: Cancelled (серый — отменено вручную) */
 .request-card[data-status="cancelled"] .request-accent {
-    background-color: #F44336;
+    background-color: #6b7280;
 }
 
 .request-card[data-status="cancelled"] .request-badge {
-    color: #F44336;
+    color: #6b7280;
 }
 
 .request-card[data-status="cancelled"] .request-title,
-.request-card[data-status="cancelled"] .request-meta {
-    opacity: 0.5;
+.request-card[data-status="cancelled"] .request-meta,
+.request-card[data-status="cancelled"] .request-date {
+    color: #9ca3af;
+    opacity: 0.9;
 }
 
 /* Status: Expired (Gray) */
@@ -512,8 +514,8 @@
 }
 
 .detail-badge.status-cancelled {
-    background-color: rgba(244, 67, 54, 0.15);
-    color: #F44336;
+    background-color: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
 }
 
 .detail-badge.status-expired {

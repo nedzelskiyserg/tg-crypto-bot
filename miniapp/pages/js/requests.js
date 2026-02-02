@@ -56,7 +56,7 @@ const statusLabels = {
 function mapApiStatus(apiStatus) {
     if (apiStatus === 'pending') return 'processing';
     if (apiStatus === 'confirmed') return 'completed';
-    if (apiStatus === 'rejected') return 'cancelled';
+    if (apiStatus === 'rejected' || apiStatus === 'cancelled') return 'cancelled';
     return 'processing';
 }
 
@@ -603,17 +603,18 @@ window.closeRequestModal = function(fromDrag) {
 };
 
 /**
- * Cancel request
+ * Cancel request (вызов API + обновление UI)
  */
 function cancelRequest(requestId) {
     const request = window.requestsState.requests.find(r => r.id === requestId);
     if (!request) return;
 
-    const doCancel = () => {
+    const applyCancelInUI = function () {
         request.status = 'cancelled';
-        const card = document.querySelector(`#pageRequests .request-card[data-id="${requestId}"]`);
+        const card = document.querySelector('#pageRequests .request-card[data-id="' + requestId + '"]');
         if (card) {
             card.dataset.status = 'cancelled';
+            card.classList.add('status-cancelled');
             const badge = card.querySelector('.request-badge');
             if (badge) badge.textContent = statusLabels.cancelled;
         }
@@ -623,18 +624,45 @@ function cancelRequest(requestId) {
         if (window.hapticFeedback) window.hapticFeedback('success');
     };
 
+    const doCancel = function () {
+        const tg = window.Telegram?.WebApp;
+        const initData = tg?.initData || '';
+        const url = getApiBaseUrl() + '/orders/' + requestId;
+        fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Telegram-Init-Data': initData
+            },
+            body: JSON.stringify({ status: 'cancelled' })
+        })
+            .then(function (res) {
+                if (res.ok) {
+                    applyCancelInUI();
+                    log('cancelRequest: API success', requestId);
+                } else {
+                    logWarn('cancelRequest: API error', { status: res.status });
+                    applyCancelInUI();
+                }
+            })
+            .catch(function (err) {
+                logError('cancelRequest: network error', err);
+                applyCancelInUI();
+            });
+    };
+
     const tg = window.Telegram?.WebApp;
     if (tg) {
         tg.showPopup({
             title: 'Отменить заявку?',
-            message: `Отменить заявку ${request.requestId}?`,
+            message: 'Отменить заявку ' + (request.requestId || '#' + requestId) + '?',
             buttons: [
                 { id: 'confirm', type: 'destructive', text: 'Отменить' },
                 { id: 'cancel', type: 'cancel' }
             ]
-        }, id => { if (id === 'confirm') doCancel(); });
+        }, function (id) { if (id === 'confirm') doCancel(); });
     } else {
-        if (confirm(`Отменить ${request.requestId}?`)) doCancel();
+        if (confirm('Отменить заявку ' + (request.requestId || '#' + requestId) + '?')) doCancel();
     }
 }
 

@@ -1,9 +1,10 @@
 """Order API endpoints"""
 from fastapi import APIRouter, HTTPException, status
+from pydantic import BaseModel
 
 from backend.api.deps import DbSession, CurrentUser
 from backend.bot.bot import get_bot
-from backend.models.order import Order
+from backend.models.order import Order, OrderStatus
 from backend.schemas.order import OrderCreate, OrderResponse
 from backend.services.notification import notify_admins_new_order
 
@@ -63,3 +64,45 @@ async def get_user_orders(
         .order_by(Order.created_at.desc())
     )
     return result.scalars().all()
+
+
+class OrderStatusUpdate(BaseModel):
+    """Schema for order status update (cancel)"""
+    status: OrderStatus
+
+
+@router.patch("/{order_id}", response_model=OrderResponse)
+async def update_order_status(
+    order_id: int,
+    body: OrderStatusUpdate,
+    db: DbSession,
+    current_user: CurrentUser,
+) -> Order:
+    """
+    Update order status (e.g. cancel by user).
+    Only the order owner can cancel; only pending orders can be cancelled.
+    """
+    from sqlalchemy import select
+
+    result = await db.execute(
+        select(Order).where(
+            Order.id == order_id,
+            Order.user_id == current_user.telegram_id,
+        )
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+
+    if body.status == OrderStatus.cancelled:
+        if order.status != OrderStatus.pending:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only pending orders can be cancelled",
+            )
+        order.status = OrderStatus.cancelled
+        await db.commit()
+        await db.refresh(order)
+        return order
+
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only status=cancelled is supported")
