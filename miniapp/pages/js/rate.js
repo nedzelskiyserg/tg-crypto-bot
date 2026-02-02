@@ -14,14 +14,17 @@
     // Rate update interval
     let rateUpdateInterval = null;
 
-    // Initialize
+    // Initialize (элементы берём из контейнера страницы «Курс», чтобы не перепутать с главной)
     function init() {
-        // Get DOM elements after page is loaded
+        const container = document.getElementById('pageRateContainer');
         backButton = document.querySelector('#pageRate .back-button');
         goHomeButton = document.getElementById('goHomeButton');
-        buyRateValue = document.getElementById('ratePageBuyValue');
-        sellRateValue = document.getElementById('ratePageSellValue');
-        
+        buyRateValue = container ? container.querySelector('#ratePageBuyValue') : document.getElementById('ratePageBuyValue');
+        sellRateValue = container ? container.querySelector('#ratePageSellValue') : document.getElementById('ratePageSellValue');
+        if (!buyRateValue || !sellRateValue) {
+            setTimeout(init, 50);
+            return;
+        }
         setupEventListeners();
         startRateUpdates();
     }
