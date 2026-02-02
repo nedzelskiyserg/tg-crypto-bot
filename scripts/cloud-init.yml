@@ -1,0 +1,18 @@
+#cloud-config
+# TG CRYPTO BOT — настройка сервера при первом запуске (Timeweb Cloud и др.)
+# Вставьте этот текст в поле "Cloud-init" / "User data" при создании сервера.
+# Домен: замените YOUR_DOMAIN на ваш домен (например example.ru) или уберите строку с DOMAIN=.
+
+package_update: true
+package_upgrade: false
+packages:
+  - curl
+  - git
+
+runcmd:
+  - curl -sSL -o /tmp/server_setup.sh "https://raw.githubusercontent.com/nedzelskiyserg/tg-crypto-bot/main/scripts/server_setup.sh"
+  - chmod +x /tmp/server_setup.sh
+  # Вариант 1: с доменом — раскомментируйте и подставьте свой домен вместо your-domain.ru
+  # - /tmp/server_setup.sh your-domain.ru
+  # Вариант 2: без домена (Nginx и certbot настроите вручную после входа)
+  - /tmp/server_setup.sh

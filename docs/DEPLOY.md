@@ -170,7 +170,15 @@ sudo systemctl start tma-app
 1. Настроить SSL (Let's Encrypt: `certbot`).
 2. Проксировать запросы на `http://127.0.0.1:8000`.
 
-Пример конфига Nginx:
+Скрипт `server_setup.sh` создаёт в Nginx блок `location ^~ /.well-known/acme-challenge/` и каталог `/var/www/certbot`. Если `certbot --nginx` выдаёт ошибку проверки домена, получите сертификат вручную:
+
+```bash
+sudo certbot certonly --webroot -w /var/www/certbot -d your-domain.com -d www.your-domain.com
+```
+
+После этого добавьте в конфиг Nginx блоки `listen 443 ssl` и пути к сертификатам (или выполните `certbot --nginx` ещё раз — он подставит SSL в существующий конфиг).
+
+Пример конфига Nginx (готовый HTTPS):
 
 ```nginx
 server {

@@ -125,6 +125,11 @@ chmod +x "$APP_DIR/deploy.sh" "$APP_DIR/stop.sh" "$APP_DIR/update.sh"
 chown "$APP_USER":"$APP_USER" "$APP_DIR/deploy.sh" "$APP_DIR/stop.sh" "$APP_DIR/update.sh" 2>/dev/null || true
 echo "  ✓ $APP_DIR/deploy.sh, stop.sh, update.sh созданы"
 
+# --- Nginx: каталог для ACME challenge (Certbot webroot) ---
+CERTBOT_WEBROOT="/var/www/certbot"
+mkdir -p "$CERTBOT_WEBROOT/.well-known/acme-challenge"
+chown -R www-data:www-data "$CERTBOT_WEBROOT" 2>/dev/null || true
+
 # --- Nginx: конфиг для домена ---
 echo "[4/4] Nginx: конфиг приложения..."
 NGINX_SITE="tma"
@@ -136,6 +141,12 @@ server {
     listen 80;
     server_name $DOMAIN www.$DOMAIN;
     client_max_body_size 10M;
+
+    # Let's Encrypt ACME challenge (certbot certonly --webroot -w $CERTBOT_WEBROOT -d ...)
+    location ^~ /.well-known/acme-challenge/ {
+        alias $CERTBOT_WEBROOT/.well-known/acme-challenge/;
+        default_type text/plain;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:8000;
@@ -155,17 +166,21 @@ NGINX_CONF
   echo "  ✓ Nginx: сайт $NGINX_SITE для $DOMAIN и www.$DOMAIN (порт 80)"
 else
   # Без домена — только заглушка, чтобы пользователь подставил server_name
-  cat > "/etc/nginx/sites-available/$NGINX_SITE" << 'NGINX_CONF'
+  cat > "/etc/nginx/sites-available/$NGINX_SITE" << NGINX_CONF
 # TG CRYPTO BOT — замените YOUR_DOMAIN на ваш домен и включите: ln -sf /etc/nginx/sites-available/tma /etc/nginx/sites-enabled && nginx -t && systemctl reload nginx
 server {
     listen 80;
     server_name YOUR_DOMAIN;
+    location ^~ /.well-known/acme-challenge/ {
+        alias $CERTBOT_WEBROOT/.well-known/acme-challenge/;
+        default_type text/plain;
+    }
     location / {
         proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
 NGINX_CONF
@@ -186,11 +201,14 @@ echo ""
 if [ -n "$DOMAIN" ]; then
   echo "3. Получите SSL (Let's Encrypt) для домена и www:"
   echo "   certbot --nginx -d $DOMAIN -d www.$DOMAIN"
+  echo "   Если certbot --nginx выдаёт ошибку, используйте webroot:"
+  echo "   certbot certonly --webroot -w $CERTBOT_WEBROOT -d $DOMAIN -d www.$DOMAIN"
   echo ""
   echo "4. В BotFather укажите URL Mini App: https://$DOMAIN"
 else
   echo "3. Задайте домен в Nginx (см. /etc/nginx/sites-available/$NGINX_SITE), затем:"
   echo "   certbot --nginx -d YOUR_DOMAIN -d www.YOUR_DOMAIN"
+  echo "   или: certbot certonly --webroot -w $CERTBOT_WEBROOT -d YOUR_DOMAIN -d www.YOUR_DOMAIN"
   echo "   В BotFather укажите URL Mini App: https://YOUR_DOMAIN"
 fi
 echo ""
