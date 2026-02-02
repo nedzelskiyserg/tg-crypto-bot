@@ -1,19 +1,24 @@
 /**
  * Requests Page Logic
- * Handles request filtering, viewing details, and actions
+ * Handles request filtering, viewing details, and actions.
+ * Loads orders from API (GET /api/orders) for the current Telegram user.
  */
 
-// Requests state
+// API base URL (same logic as exchange.js)
+function getApiBaseUrl() {
+    const config = window.BACKEND_API_CONFIG;
+    if (config && config.baseUrl) return config.baseUrl;
+    const origin = typeof window !== 'undefined' && window.location && window.location.origin ? window.location.origin : '';
+    if (origin && !/localhost|127\.0\.0\.1/.test(origin)) return origin + '/api';
+    return 'http://localhost:8000/api';
+}
+
+// Requests state (loaded from API)
 window.requestsState = {
     currentFilter: 'all',
-    requests: [
-        { id: 1, type: 'buy', title: 'Покупка USDT', sendAmount: 25000, sendCurrency: 'RUB', receiveAmount: 256.41, receiveCurrency: 'USDT', rate: 97.50, status: 'processing', date: '30.01.2026', time: '15:42', requestId: '#NE-2026-00128' },
-        { id: 2, type: 'sell', title: 'Продажа USDT', sendAmount: 100, sendCurrency: 'USDT', receiveAmount: 9750, receiveCurrency: 'RUB', rate: 97.50, status: 'pending', date: '30.01.2026', time: '14:15', requestId: '#NE-2026-00127' },
-        { id: 3, type: 'buy', title: 'Покупка USDT', sendAmount: 10000, sendCurrency: 'RUB', receiveAmount: 102.56, receiveCurrency: 'USDT', rate: 97.50, status: 'completed', date: '29.01.2026', time: '14:32', requestId: '#NE-2026-00123' },
-        { id: 4, type: 'buy', title: 'Покупка USDT', sendAmount: 5000, sendCurrency: 'RUB', receiveAmount: 51.28, receiveCurrency: 'USDT', rate: 97.50, status: 'cancelled', date: '28.01.2026', time: '11:20', requestId: '#NE-2026-00119' },
-        { id: 5, type: 'sell', title: 'Продажа USDT', sendAmount: 50, sendCurrency: 'USDT', receiveAmount: 4875, receiveCurrency: 'RUB', rate: 97.50, status: 'completed', date: '27.01.2026', time: '09:45', requestId: '#NE-2026-00112' }
-    ],
-    selectedRequest: null
+    requests: [],
+    selectedRequest: null,
+    loaded: false
 };
 
 const statusLabels = {
@@ -21,8 +26,150 @@ const statusLabels = {
     pending: 'ОЖИДАЕТ ОПЛАТЫ',
     completed: 'ЗАВЕРШЕНО',
     cancelled: 'ОТМЕНЕНО',
+    rejected: 'ОТКЛОНЕНО',
     expired: 'ИСТЕКЛО'
 };
+
+// Map backend status to frontend
+function mapApiStatus(apiStatus) {
+    if (apiStatus === 'pending') return 'processing';
+    if (apiStatus === 'confirmed') return 'completed';
+    if (apiStatus === 'rejected') return 'cancelled';
+    return 'processing';
+}
+
+/**
+ * Fetch user orders from API
+ */
+async function fetchOrdersFromApi() {
+    const tg = window.Telegram?.WebApp;
+    const initData = tg?.initData || '';
+    const url = getApiBaseUrl() + '/orders';
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Telegram-Init-Data': initData
+            }
+        });
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.warn('[Requests] Not authenticated');
+                return [];
+            }
+            throw new Error('HTTP ' + response.status);
+        }
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (e) {
+        console.error('[Requests] Failed to load orders:', e);
+        return [];
+    }
+}
+
+/**
+ * Map API order to frontend format
+ */
+function mapApiOrderToRequest(apiOrder) {
+    const isBuy = (apiOrder.currency_from || '').toUpperCase() === 'RUB';
+    const sendAmount = Number(apiOrder.amount_from);
+    const receiveAmount = Number(apiOrder.amount_to);
+    const rate = Number(apiOrder.exchange_rate);
+    const created = apiOrder.created_at ? new Date(apiOrder.created_at) : new Date();
+    const dateStr = created.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '.');
+    const timeStr = created.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    return {
+        id: apiOrder.id,
+        type: isBuy ? 'buy' : 'sell',
+        title: isBuy ? 'Покупка USDT' : 'Продажа USDT',
+        sendAmount,
+        sendCurrency: apiOrder.currency_from || '',
+        receiveAmount,
+        receiveCurrency: apiOrder.currency_to || '',
+        rate,
+        status: mapApiStatus(apiOrder.status),
+        date: dateStr,
+        time: timeStr,
+        requestId: '#NE-' + (created.getFullYear()) + '-' + String(apiOrder.id).padStart(5, '0')
+    };
+}
+
+/**
+ * Render orders list in DOM
+ */
+function renderOrdersList(orders) {
+    window.requestsState.requests = orders;
+    window.requestsState.loaded = true;
+
+    const listEl = document.getElementById('requestsList');
+    const emptyEl = document.getElementById('requestsEmpty');
+    if (!listEl) return;
+
+    listEl.innerHTML = '';
+    if (orders.length === 0) {
+        listEl.style.display = 'none';
+        if (emptyEl) {
+            emptyEl.style.display = 'flex';
+        }
+        updateRequestsCount();
+        filterRequests(window.requestsState.currentFilter);
+        return;
+    }
+
+    if (emptyEl) emptyEl.style.display = 'none';
+    listEl.style.display = '';
+
+    const statusBadgeLabels = {
+        processing: 'В ОБРАБОТКЕ',
+        pending: 'ОЖИДАЕТ ОПЛАТЫ',
+        completed: 'ЗАВЕРШЕНО',
+        cancelled: 'ОТМЕНЕНО',
+        rejected: 'ОТКЛОНЕНО'
+    };
+
+    orders.forEach(function (req) {
+        const badge = statusBadgeLabels[req.status] || req.status;
+        const sendStr = formatRequestAmount(req.sendAmount) + ' ' + req.sendCurrency;
+        const receiveStr = formatRequestAmount(req.receiveAmount) + ' ' + req.receiveCurrency;
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        card.dataset.status = req.status;
+        card.dataset.id = String(req.id);
+        card.innerHTML =
+            '<div class="request-accent"></div>' +
+            '<div class="request-info">' +
+            '<span class="request-title">' + escapeHtml(req.title) + '</span>' +
+            '<span class="request-meta">' + escapeHtml(sendStr) + ' → ' + escapeHtml(receiveStr) + '</span>' +
+            '</div>' +
+            '<div class="request-status">' +
+            '<span class="request-badge">' + escapeHtml(badge) + '</span>' +
+            '<span class="request-date">' + escapeHtml(req.date) + '</span>' +
+            '</div>' +
+            '<button class="request-action" data-action="view-request">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>' +
+            '</button>';
+        listEl.appendChild(card);
+    });
+
+    updateRequestsCount();
+    filterRequests(window.requestsState.currentFilter);
+    animateCardsOnLoad();
+}
+
+function formatRequestAmount(n) {
+    if (n == null || n === '') return '0';
+    const num = Number(n);
+    if (isNaN(num)) return String(n);
+    return num.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function escapeHtml(s) {
+    if (s == null) return '';
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+}
 
 // Track if global handler is installed
 let globalHandlerInstalled = false;
@@ -60,15 +207,32 @@ window.initRequestsPage = function() {
             setupModalDrag(modal);
         }
 
-        // Update UI
-        updateRequestsCount();
-        animateCardsOnLoad();
-
-        console.log('[Requests] Page initialized');
+        // Load orders from API and render
+        loadAndRenderOrders();
     };
 
     setTimeout(waitForElements, 50);
 };
+
+/**
+ * Load orders from API and render list
+ */
+async function loadAndRenderOrders() {
+    const listEl = document.getElementById('requestsList');
+    const emptyEl = document.getElementById('requestsEmpty');
+    if (listEl) {
+        listEl.innerHTML = '<div class="requests-loading" style="padding:2rem;text-align:center;color:#888;">Загрузка заявок...</div>';
+        listEl.style.display = '';
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    const apiOrders = await fetchOrdersFromApi();
+    const mapped = apiOrders.map(mapApiOrderToRequest);
+    renderOrdersList(mapped);
+    console.log('[Requests] Loaded', mapped.length, 'orders');
+}
+
+window.loadAndRenderOrders = loadAndRenderOrders;
 
 /**
  * Global click handler - runs in capture phase before app.js handler
