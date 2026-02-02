@@ -107,3 +107,55 @@ async def update_order_status(
         return order
 
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only status=cancelled is supported")
+
+
+class AdminOrderUpdate(BaseModel):
+    """Schema for admin order update"""
+    status: OrderStatus
+    admin_id: int
+
+
+@router.patch("/admin/{order_id}", response_model=OrderResponse)
+async def admin_update_order_status(
+    order_id: int,
+    body: AdminOrderUpdate,
+    db: DbSession,
+) -> Order:
+    """
+    Update order status by admin (confirm/reject).
+    Used by bot for processing order callbacks.
+    """
+    from sqlalchemy import select
+    from backend.services.admin_loader import load_admin_ids
+
+    # Verify admin
+    admin_ids = load_admin_ids()
+    if body.admin_id not in admin_ids:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not an admin"
+        )
+
+    result = await db.execute(
+        select(Order).where(Order.id == order_id)
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+
+    if order.status != OrderStatus.pending:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Order already processed: {order.status.value}"
+        )
+
+    if body.status not in [OrderStatus.confirmed, OrderStatus.rejected]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only confirmed/rejected status allowed"
+        )
+
+    order.status = body.status
+    await db.commit()
+    await db.refresh(order)
+    return order

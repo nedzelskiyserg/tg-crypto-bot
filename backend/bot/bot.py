@@ -1,39 +1,35 @@
-"""Bot instance and dispatcher"""
+"""Bot instance for sending notifications (no polling)"""
 from typing import Optional
-from aiogram import Bot, Dispatcher
+from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from backend.config import settings
 
-# Create bot instance
+# Bot instance (for sending notifications only, polling handled by /bot)
 bot: Optional[Bot] = None
-dp: Optional[Dispatcher] = None
 
 
-def init_bot() -> tuple[Bot, Dispatcher]:
-    """Initialize bot and dispatcher"""
-    global bot, dp
+def init_bot_for_notifications() -> Bot:
+    """Initialize bot instance for sending notifications (no polling)"""
+    global bot
 
     bot = Bot(
         token=settings.BOT_TOKEN,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
-    dp = Dispatcher()
 
-    # Register handlers
-    from backend.bot.handlers import start, admin
-    dp.include_router(start.router)
-    dp.include_router(admin.router)
-
-    return bot, dp
-
-
-def get_bot() -> Optional[Bot]:
-    """Get bot instance"""
     return bot
 
 
-def get_dispatcher() -> Optional[Dispatcher]:
-    """Get dispatcher instance"""
-    return dp
+def get_bot() -> Optional[Bot]:
+    """Get bot instance for sending messages"""
+    return bot
+
+
+async def close_bot() -> None:
+    """Close bot session"""
+    global bot
+    if bot:
+        await bot.session.close()
+        bot = None

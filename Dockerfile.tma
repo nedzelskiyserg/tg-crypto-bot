@@ -1,11 +1,11 @@
-# TG CRYPTO BOT — Telegram Mini App + Backend API
-# Один образ: FastAPI (API + бот) + раздача статики Mini App
+# TG CRYPTO BOT — Telegram Mini App + Backend API + Bot
+# Один образ для всех сервисов
 
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Системные зависимости (при необходимости для сборки пакетов)
+# Системные зависимости
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
@@ -16,15 +16,16 @@ ENV PIP_DEFAULT_TIMEOUT=300
 ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 RUN pip install --no-cache-dir --timeout 300 --retries 5 -r requirements.txt
 
-# Код: backend + miniapp (без лишнего через .dockerignore)
+# Код: backend + miniapp + bot + shared
 COPY backend ./backend
 COPY miniapp ./miniapp
+COPY bot ./bot
+COPY shared ./shared
 
 # Директория для SQLite и данных
 RUN mkdir -p /app/data && chmod 755 /app/data
 
-# Не запускаем от root в продакшене по желанию (для SQLite и файлов достаточно volume)
 EXPOSE 8000
 
-# Запуск: API на 8000, Mini App отдаётся с того же сервера по /
+# По умолчанию запускаем FastAPI (переопределяется в docker-compose для bot)
 CMD ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

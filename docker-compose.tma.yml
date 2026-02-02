@@ -1,12 +1,12 @@
-# TG CRYPTO BOT — Telegram Mini App + Backend API
+# TG CRYPTO BOT — Telegram Mini App + Backend API + Bot
 # Запуск: docker compose -f docker-compose.tma.yml up -d
 
 services:
+  # FastAPI backend (API + Mini App static files)
   app:
     build:
       context: .
       dockerfile: Dockerfile.tma
-      # Сеть хоста при сборке — помогает при таймаутах PyPI (серверы в РФ)
       network: host
     container_name: tma_app
     restart: unless-stopped
@@ -22,9 +22,7 @@ services:
       - GOOGLE_CREDENTIALS_PATH=${GOOGLE_CREDENTIALS_PATH:-/app/credentials.json}
     volumes:
       - ./data:/app/data
-      # Админы из Google таблицы (лист Settings). Файл credentials.json в корне проекта.
       - ./credentials.json:/app/credentials.json:ro
-      # Админы из Excel — если не используете Google, раскомментируйте строку выше и закомментируйте эту
       - ./admins.xlsx:/app/backend/admins.xlsx:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
@@ -32,3 +30,36 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    networks:
+      - tma_network
+
+  # Telegram bot (polling)
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.tma
+      network: host
+    container_name: tma_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - USE_GOOGLE_SHEETS=${USE_GOOGLE_SHEETS:-true}
+      - GOOGLE_SHEETS_ID=${GOOGLE_SHEETS_ID:-}
+      - GOOGLE_CREDENTIALS_PATH=${GOOGLE_CREDENTIALS_PATH:-/app/credentials.json}
+      - MENU_FILE=/app/menu.xlsx
+      - API_BASE_URL=http://app:8000/api
+    volumes:
+      - ./credentials.json:/app/credentials.json:ro
+      - ./menu.xlsx:/app/menu.xlsx:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    command: ["python", "-m", "bot.main"]
+    networks:
+      - tma_network
+
+networks:
+  tma_network:
+    driver: bridge

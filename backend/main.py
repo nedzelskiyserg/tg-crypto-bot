@@ -1,5 +1,4 @@
-"""Main application entry point - FastAPI + Aiogram"""
-import asyncio
+"""Main application entry point - FastAPI backend"""
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -9,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from backend.config import settings, MINIAPP_DIR
 from backend.database import create_tables
 from backend.api import orders_router, rate_router, users_router
-from backend.bot.bot import init_bot
+from backend.bot.bot import init_bot_for_notifications
 
 
 @asynccontextmanager
@@ -22,24 +21,16 @@ async def lifespan(app: FastAPI):
     await create_tables()
     print("Database tables created")
 
-    # Initialize and start bot
-    bot, dp = init_bot()
-    print("Bot initialized")
-
-    # Start polling in background task
-    polling_task = asyncio.create_task(dp.start_polling(bot))
-    print("Bot polling started")
+    # Initialize bot instance for sending notifications (no polling)
+    init_bot_for_notifications()
+    print("Bot initialized for notifications")
 
     yield
 
     # Shutdown
-    polling_task.cancel()
-    try:
-        await polling_task
-    except asyncio.CancelledError:
-        pass
-    await bot.session.close()
-    print("Bot stopped")
+    from backend.bot.bot import close_bot
+    await close_bot()
+    print("Bot session closed")
 
 
 # Create FastAPI app

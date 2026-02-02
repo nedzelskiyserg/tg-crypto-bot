@@ -16,7 +16,8 @@ from bot.handlers import (
     start_handler,
     menu_handler,
     admin_panel_handler,
-    reply_button_handler
+    reply_button_handler,
+    orders_router
 )
 
 # Настраиваем логирование
@@ -88,6 +89,7 @@ async def main() -> None:
         logger.warning(f"Не удалось очистить webhook: {e}")
     
     # Регистрируем обработчики
+    dp.include_router(orders_router)  # Order confirm/reject callbacks
     dp.message.register(start_handler, Command("start"))
     # Обработчик для всех callback_query, начинающихся с "menu_"
     dp.callback_query.register(menu_handler, lambda c: c.data and c.data.startswith("menu_"))
