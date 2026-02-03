@@ -23,14 +23,14 @@
                     <span class="section-title">ФОРМУЛА КУРСА</span>
                 </div>
 
-                <!-- Current Rates Info (у Mosca: продажа = buy, покупка = sell) -->
+                <!-- Current Rates Info: сверху Покупка, снизу Продажа; значения пишутся наоборот (по id) -->
                 <div class="admin-rates-info">
                     <div class="admin-rate-row">
-                        <span class="admin-rate-label">API курс (продажа)</span>
+                        <span class="admin-rate-label">API курс (покупка)</span>
                         <span class="admin-rate-value" id="adminRawSell">—</span>
                     </div>
                     <div class="admin-rate-row">
-                        <span class="admin-rate-label">API курс (покупка)</span>
+                        <span class="admin-rate-label">API курс (продажа)</span>
                         <span class="admin-rate-value" id="adminRawBuy">—</span>
                     </div>
                 </div>
@@ -38,16 +38,16 @@
                 <!-- Markup Inputs -->
                 <div class="admin-markup-form">
                     <div class="admin-input-group">
-                        <label class="admin-input-label">Наценка продажи (%)</label>
+                        <label class="admin-input-label">Наценка покупки (%)</label>
                         <div class="admin-input-wrap">
-                            <input type="number" step="0.01" id="adminSellMarkup" class="admin-input" placeholder="0.00" />
+                            <input type="number" step="0.01" id="adminBuyMarkup" class="admin-input" placeholder="0.00" />
                             <span class="admin-input-suffix">%</span>
                         </div>
                     </div>
                     <div class="admin-input-group">
-                        <label class="admin-input-label">Наценка покупки (%)</label>
+                        <label class="admin-input-label">Наценка продажи (%)</label>
                         <div class="admin-input-wrap">
-                            <input type="number" step="0.01" id="adminBuyMarkup" class="admin-input" placeholder="0.00" />
+                            <input type="number" step="0.01" id="adminSellMarkup" class="admin-input" placeholder="0.00" />
                             <span class="admin-input-suffix">%</span>
                         </div>
                     </div>
@@ -61,11 +61,11 @@
                     </div>
                     <div class="admin-rates-info">
                         <div class="admin-rate-row">
-                            <span class="admin-rate-label">Продажа</span>
+                            <span class="admin-rate-label">Покупка</span>
                             <span class="admin-rate-value accent" id="adminFinalSell">—</span>
                         </div>
                         <div class="admin-rate-row">
-                            <span class="admin-rate-label">Покупка</span>
+                            <span class="admin-rate-label">Продажа</span>
                             <span class="admin-rate-value accent" id="adminFinalBuy">—</span>
                         </div>
                     </div>
