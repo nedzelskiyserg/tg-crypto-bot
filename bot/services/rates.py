@@ -1,6 +1,7 @@
 """
-Сервис получения курсов: сначала внешний API (mosca.moscow),
-при недоступности — бэкенд /api/rate (Google Таблица Settings: Buy/Sell).
+Сервис получения курсов для сообщения «Курсы» в инлайн-боте.
+Приоритет: бэкенд /api/rate (те же курсы, что в TMA — с наценкой из админки),
+при недоступности — внешний API (mosca.moscow, сырые курсы).
 """
 import os
 import aiohttp
@@ -12,7 +13,7 @@ RATE_API_TOKEN = os.getenv(
     "RATE_API_TOKEN",
     "HZAKlDuHaMD5sRpWgeciz6OxeK8b7h76NJHdeqi_OdurDRJBv1mJy4iuyz53wgZRbEmxCiKTojNYgLmRhIzqlA"
 )
-# Бэкенд приложения (fallback: курсы из Google Таблицы Settings)
+# Бэкенд приложения (курсы с наценкой из админки TMA — приоритетный источник)
 API_BASE_URL = os.getenv("API_BASE_URL", "http://app:8000/api").rstrip("/")
 
 # Cache for rates
@@ -59,8 +60,7 @@ async def fetch_rates_from_api() -> Optional[Tuple[float, float]]:
 
 async def fetch_rates_from_backend() -> Optional[Tuple[float, float]]:
     """
-    Курсы из бэкенда /api/rate (Google Таблица Settings: Buy, Sell).
-    Используется, когда внешний API недоступен.
+    Курсы из бэкенда /api/rate — с наценкой из админки TMA (те же, что в приложении).
     """
     global _cached_rates
     url = f"{API_BASE_URL}/rate"
@@ -80,24 +80,23 @@ async def fetch_rates_from_backend() -> Optional[Tuple[float, float]]:
 
 async def get_rates() -> Tuple[float, float]:
     """
-    Текущие курсы (buy, sell).
-    1) Внешний API (mosca.moscow)
-    2) Бэкенд /api/rate (Google Таблица Settings)
+    Текущие курсы (buy, sell) для сообщения «Курсы».
+    1) Бэкенд /api/rate — курсы с наценкой из админки (как в TMA)
+    2) Внешний API (mosca.moscow) — сырые курсы, если бэкенд недоступен
     3) Кэш
     4) (0, 0) — в тексте останутся цифры из таблицы (Курсы).
     """
-    rates = await fetch_rates_from_api()
+    rates = await fetch_rates_from_backend()
     if rates:
         return rates
 
-    rates = await fetch_rates_from_backend()
+    rates = await fetch_rates_from_api()
     if rates:
         return rates
 
     if _cached_rates:
         return _cached_rates
 
-    # Не подставляем — в сообщении остаются цифры из текста в Google Таблице
     return (0.0, 0.0)
 
 
