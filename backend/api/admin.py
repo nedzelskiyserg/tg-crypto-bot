@@ -74,8 +74,9 @@ async def get_rate_settings(
     updated_by = rs.updated_by if rs else "system"
 
     raw_buy, raw_sell = get_raw_rates()
-    final_buy = round(raw_buy * (1 + buy_markup / 100), 2)
-    final_sell = round(raw_sell * (1 + sell_markup / 100), 2)
+    # У Mosca покупка = sell, продажа = buy → наценки применяем так же
+    final_buy = round(raw_buy * (1 + sell_markup / 100), 2)
+    final_sell = round(raw_sell * (1 + buy_markup / 100), 2)
 
     return RateSettingsResponse(
         buy_markup_percent=buy_markup,
@@ -121,8 +122,8 @@ async def update_rate_settings(
     save_markup_settings(rs.buy_markup_percent, rs.sell_markup_percent)
 
     raw_buy, raw_sell = get_raw_rates()
-    final_buy = round(raw_buy * (1 + rs.buy_markup_percent / 100), 2)
-    final_sell = round(raw_sell * (1 + rs.sell_markup_percent / 100), 2)
+    final_buy = round(raw_buy * (1 + rs.sell_markup_percent / 100), 2)
+    final_sell = round(raw_sell * (1 + rs.buy_markup_percent / 100), 2)
 
     return RateSettingsResponse(
         buy_markup_percent=rs.buy_markup_percent,

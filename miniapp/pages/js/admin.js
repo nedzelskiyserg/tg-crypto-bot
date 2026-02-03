@@ -113,12 +113,13 @@ function updateRateSettingsUI(data) {
     const updatedInfoEl = document.getElementById('adminUpdatedInfo');
     const updatedTextEl = document.getElementById('adminUpdatedText');
 
-    if (rawBuyEl) rawBuyEl.textContent = data.raw_buy_rate.toFixed(2) + ' RUB';
-    if (rawSellEl) rawSellEl.textContent = data.raw_sell_rate.toFixed(2) + ' RUB';
+    // У Mosca покупка = sell, продажа = buy — в админке показываем соответственно
+    if (rawBuyEl) rawBuyEl.textContent = data.raw_sell_rate.toFixed(2) + ' RUB';
+    if (rawSellEl) rawSellEl.textContent = data.raw_buy_rate.toFixed(2) + ' RUB';
     if (buyMarkupEl) buyMarkupEl.value = data.buy_markup_percent;
     if (sellMarkupEl) sellMarkupEl.value = data.sell_markup_percent;
-    if (finalBuyEl) finalBuyEl.textContent = data.final_buy_rate.toFixed(2) + ' RUB';
-    if (finalSellEl) finalSellEl.textContent = data.final_sell_rate.toFixed(2) + ' RUB';
+    if (finalBuyEl) finalBuyEl.textContent = data.final_sell_rate.toFixed(2) + ' RUB';
+    if (finalSellEl) finalSellEl.textContent = data.final_buy_rate.toFixed(2) + ' RUB';
 
     if (data.updated_at && updatedInfoEl && updatedTextEl) {
         const d = new Date(data.updated_at);
@@ -139,11 +140,12 @@ function recalcFinalRates() {
     const rawBuy = window.adminState.rawBuy;
     const rawSell = window.adminState.rawSell;
 
-    if (rawBuy > 0 && finalBuyEl) {
-        finalBuyEl.textContent = (rawBuy * (1 + buyMarkup / 100)).toFixed(2) + ' RUB';
+    // Наценка покупки → к rawSell (Mosca sell); наценка продажи → к rawBuy (Mosca buy)
+    if (rawSell > 0 && finalBuyEl) {
+        finalBuyEl.textContent = (rawSell * (1 + buyMarkup / 100)).toFixed(2) + ' RUB';
     }
-    if (rawSell > 0 && finalSellEl) {
-        finalSellEl.textContent = (rawSell * (1 + sellMarkup / 100)).toFixed(2) + ' RUB';
+    if (rawBuy > 0 && finalSellEl) {
+        finalSellEl.textContent = (rawBuy * (1 + sellMarkup / 100)).toFixed(2) + ' RUB';
     }
 }
 

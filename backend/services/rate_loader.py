@@ -167,15 +167,18 @@ def get_rates_from_settings() -> tuple[float, float]:
     """
     Get Buy and Sell rates with markup applied.
 
-    Formula:
-        final_rate = api_rate * (1 + markup_percent / 100)
+    У Mosca: покупка = sell, продажа = buy. Поэтому:
+    - «Наценка покупки» применяется к сырому sell → итог для карточки «Покупка»
+    - «Наценка продажи» применяется к сырому buy → итог для карточки «Продажа»
 
-    Returns (buy_rate, sell_rate).
+    Formula: final_rate = api_rate * (1 + markup_percent / 100)
+    Returns (buy_rate, sell_rate) — в том же порядке, что и API (buy, sell).
     """
     raw_buy, raw_sell = get_raw_rates()
     buy_markup, sell_markup = get_markup_settings()
 
-    final_buy = round(raw_buy * (1 + buy_markup / 100), 2)
-    final_sell = round(raw_sell * (1 + sell_markup / 100), 2)
+    # Наценка продажи → к API buy; наценка покупки → к API sell
+    final_buy = round(raw_buy * (1 + sell_markup / 100), 2)
+    final_sell = round(raw_sell * (1 + buy_markup / 100), 2)
 
     return (final_buy, final_sell)
