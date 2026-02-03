@@ -85,11 +85,6 @@ async def health_check():
     return {"status": "healthy"}
 
 
-# Serve Admin Panel static files at /admin
-ADMIN_DIR = BASE_DIR / "admin"
-if ADMIN_DIR.exists():
-    app.mount("/admin", StaticFiles(directory=str(ADMIN_DIR), html=True), name="admin")
-
 # Serve Mini App static files at / (production: one server for API + frontend)
 if MINIAPP_DIR.exists():
     app.mount("/", StaticFiles(directory=str(MINIAPP_DIR), html=True), name="miniapp")

@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy import select, func
 
-from backend.api.deps import DbSession
+from backend.api.deps import DbSession, CurrentUser
 from backend.models.order import Order, OrderStatus
 from backend.models.rate_settings import RateSettings
 from backend.schemas.order import OrderResponse
@@ -26,6 +26,16 @@ def _verify_admin(admin_id: int) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not an admin",
         )
+
+
+# --- Admin check via Telegram initData ---
+
+@router.get("/check")
+async def check_admin(current_user: CurrentUser):
+    """Check if the current Telegram user is an admin. Uses initData auth."""
+    admin_ids = load_admin_ids()
+    is_admin = current_user.telegram_id in admin_ids
+    return {"is_admin": is_admin, "telegram_id": current_user.telegram_id}
 
 
 # --- Rate Settings ---

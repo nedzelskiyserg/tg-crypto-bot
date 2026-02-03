@@ -52,6 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initRateUpdates();
     // Preload exchange page (no lazy load)
     loadExchangePage();
+    // Check if current user is admin and show admin button
+    checkAdminStatus();
 });
 
 /**
@@ -194,6 +196,10 @@ function handleButtonClick(action, button) {
             showFeatureInDevelopment('Реферальная программа');
             break;
 
+        case 'admin':
+            showPage('admin');
+            break;
+
         case 'rate-details':
             showPage('rate');
             break;
@@ -288,6 +294,9 @@ function showPage(pageName) {
     } else if (pageName === 'rate') {
         // Load rate page dynamically
         loadRatePage();
+    } else if (pageName === 'admin') {
+        // Load admin page dynamically
+        loadAdminPage();
     } else {
         // Other pages
         const targetPage = document.getElementById(`page${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`);
@@ -959,6 +968,110 @@ async function loadRatePage() {
             setTimeout(() => {
                 window.updateRatesFromAPI();
             }, 100);
+        }
+    }
+}
+
+/**
+ * Check if the current Telegram user is an admin and show/hide admin button
+ */
+async function checkAdminStatus() {
+    const tg = window.Telegram?.WebApp;
+    const initData = tg?.initData || '';
+    if (!initData) {
+        console.log('No initData, skipping admin check');
+        return;
+    }
+
+    try {
+        const baseUrl = getBackendApiBaseUrl();
+        const response = await fetch(baseUrl + '/admin/check', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Telegram-Init-Data': initData
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.is_admin) {
+                const adminBtn = document.getElementById('btnAdminPanel');
+                if (adminBtn) {
+                    adminBtn.style.display = '';
+                    // Apply animation like other buttons
+                    adminBtn.style.animationDelay = '0.4s';
+                }
+                console.log('Admin access granted for user', data.telegram_id);
+            }
+        }
+    } catch (e) {
+        console.log('Admin check failed (non-critical):', e.message || e);
+    }
+}
+
+/**
+ * Load admin page dynamically
+ */
+let adminPageLoaded = false;
+let adminStylesLoaded = false;
+let adminScriptLoaded = false;
+
+async function loadAdminPage() {
+    const container = document.getElementById('pageAdminContainer');
+    if (!container) return;
+
+    // Load CSS if not loaded
+    if (!adminStylesLoaded) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'pages/css/admin.css';
+        document.head.appendChild(link);
+        adminStylesLoaded = true;
+    }
+
+    // Load HTML if not loaded
+    if (!adminPageLoaded) {
+        try {
+            const response = await fetch('pages/admin.html');
+            const html = await response.text();
+            container.innerHTML = html;
+            adminPageLoaded = true;
+        } catch (error) {
+            console.error('Failed to load admin page:', error);
+            return;
+        }
+    }
+
+    // Load JS if not loaded
+    if (!adminScriptLoaded) {
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'pages/js/admin.js';
+            script.onload = () => {
+                adminScriptLoaded = true;
+                if (window.initAdminPage) {
+                    window.initAdminPage();
+                }
+                const adminPage = container.querySelector('.page-admin');
+                if (adminPage) {
+                    adminPage.classList.add('active');
+                }
+                resolve();
+            };
+            script.onerror = () => {
+                console.error('Failed to load admin script');
+                resolve();
+            };
+            document.body.appendChild(script);
+        });
+    } else {
+        if (window.initAdminPage) {
+            window.initAdminPage();
+        }
+        const adminPage = container.querySelector('.page-admin');
+        if (adminPage) {
+            adminPage.classList.add('active');
         }
     }
 }

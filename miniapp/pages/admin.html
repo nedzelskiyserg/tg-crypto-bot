@@ -1,0 +1,168 @@
+<!-- Admin Panel Page Template -->
+<div class="page page-admin" id="pageAdmin">
+    <!-- Top Header -->
+    <div class="top-header" id="adminTopHeader">АДМИН ПАНЕЛЬ</div>
+
+    <!-- Admin Content -->
+    <main class="admin-content">
+        <!-- Admin Tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-admin-tab="rates">
+                <span>КУРС</span>
+            </button>
+            <button class="admin-tab" data-admin-tab="orders">
+                <span>ЗАЯВКИ</span>
+            </button>
+        </div>
+
+        <!-- Tab: Rate Settings -->
+        <div class="admin-tab-content active" id="adminTabRates" data-tab="rates">
+            <section class="admin-section">
+                <div class="admin-section-header">
+                    <div class="accent-bar"></div>
+                    <span class="section-title">ФОРМУЛА КУРСА</span>
+                </div>
+
+                <!-- Current Rates Info -->
+                <div class="admin-rates-info">
+                    <div class="admin-rate-row">
+                        <span class="admin-rate-label">API курс (покупка)</span>
+                        <span class="admin-rate-value" id="adminRawBuy">—</span>
+                    </div>
+                    <div class="admin-rate-row">
+                        <span class="admin-rate-label">API курс (продажа)</span>
+                        <span class="admin-rate-value" id="adminRawSell">—</span>
+                    </div>
+                </div>
+
+                <!-- Markup Inputs -->
+                <div class="admin-markup-form">
+                    <div class="admin-input-group">
+                        <label class="admin-input-label">Наценка покупки (%)</label>
+                        <div class="admin-input-wrap">
+                            <input type="number" step="0.01" id="adminBuyMarkup" class="admin-input" placeholder="0.00" />
+                            <span class="admin-input-suffix">%</span>
+                        </div>
+                    </div>
+                    <div class="admin-input-group">
+                        <label class="admin-input-label">Наценка продажи (%)</label>
+                        <div class="admin-input-wrap">
+                            <input type="number" step="0.01" id="adminSellMarkup" class="admin-input" placeholder="0.00" />
+                            <span class="admin-input-suffix">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Rates Preview -->
+                <div class="admin-final-rates">
+                    <div class="admin-section-header">
+                        <div class="accent-bar"></div>
+                        <span class="section-title">ИТОГОВЫЙ КУРС</span>
+                    </div>
+                    <div class="admin-rates-info">
+                        <div class="admin-rate-row">
+                            <span class="admin-rate-label">Покупка</span>
+                            <span class="admin-rate-value accent" id="adminFinalBuy">—</span>
+                        </div>
+                        <div class="admin-rate-row">
+                            <span class="admin-rate-label">Продажа</span>
+                            <span class="admin-rate-value accent" id="adminFinalSell">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <button class="admin-save-btn" id="adminSaveRates">
+                    <span>СОХРАНИТЬ</span>
+                </button>
+
+                <!-- Last Updated Info -->
+                <div class="admin-updated-info" id="adminUpdatedInfo" style="display: none;">
+                    <span id="adminUpdatedText"></span>
+                </div>
+            </section>
+        </div>
+
+        <!-- Tab: Orders -->
+        <div class="admin-tab-content" id="adminTabOrders" data-tab="orders">
+            <section class="admin-section">
+                <div class="admin-section-header">
+                    <div class="accent-bar"></div>
+                    <span class="section-title">ВСЕ ЗАЯВКИ</span>
+                    <span class="admin-orders-total" id="adminOrdersTotal"></span>
+                </div>
+
+                <!-- Orders Filters -->
+                <div class="admin-orders-filters">
+                    <!-- Status Filter -->
+                    <div class="admin-filter-row">
+                        <label class="admin-filter-label">Статус</label>
+                        <select id="adminFilterStatus" class="admin-select">
+                            <option value="">Все</option>
+                            <option value="pending">В обработке</option>
+                            <option value="confirmed">Подтверждено</option>
+                            <option value="rejected">Отклонено</option>
+                            <option value="cancelled">Отменено</option>
+                        </select>
+                    </div>
+                    <!-- Order ID -->
+                    <div class="admin-filter-row">
+                        <label class="admin-filter-label">ID заявки</label>
+                        <input type="number" id="adminFilterOrderId" class="admin-input admin-input-sm" placeholder="Номер" />
+                    </div>
+                    <!-- Amount Range -->
+                    <div class="admin-filter-row admin-filter-row-double">
+                        <div class="admin-filter-half">
+                            <label class="admin-filter-label">Сумма от</label>
+                            <input type="number" id="adminFilterAmountMin" class="admin-input admin-input-sm" placeholder="Мин" />
+                        </div>
+                        <div class="admin-filter-half">
+                            <label class="admin-filter-label">Сумма до</label>
+                            <input type="number" id="adminFilterAmountMax" class="admin-input admin-input-sm" placeholder="Макс" />
+                        </div>
+                    </div>
+                    <!-- Date Range -->
+                    <div class="admin-filter-row admin-filter-row-double">
+                        <div class="admin-filter-half">
+                            <label class="admin-filter-label">Дата от</label>
+                            <input type="date" id="adminFilterDateFrom" class="admin-input admin-input-sm" />
+                        </div>
+                        <div class="admin-filter-half">
+                            <label class="admin-filter-label">Дата до</label>
+                            <input type="date" id="adminFilterDateTo" class="admin-input admin-input-sm" />
+                        </div>
+                    </div>
+                    <!-- Filter Actions -->
+                    <div class="admin-filter-actions">
+                        <button class="admin-filter-btn" id="adminApplyFilters">
+                            <span>ПРИМЕНИТЬ</span>
+                        </button>
+                        <button class="admin-filter-btn admin-filter-btn-reset" id="adminResetFilters">
+                            <span>СБРОСИТЬ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Orders List -->
+                <div class="admin-orders-list" id="adminOrdersList"></div>
+
+                <!-- Pagination -->
+                <div class="admin-pagination" id="adminPagination" style="display: none;">
+                    <button class="admin-page-btn" id="adminPrevPage">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <span class="admin-page-info" id="adminPageInfo">1 / 1</span>
+                    <button class="admin-page-btn" id="adminNextPage">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+
+                <!-- Empty State -->
+                <div class="admin-orders-empty" id="adminOrdersEmpty" style="display: none;">
+                    <span class="empty-title">Нет заявок</span>
+                    <span class="empty-desc">По выбранным фильтрам заявки не найдены</span>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>

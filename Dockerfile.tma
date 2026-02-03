@@ -16,10 +16,9 @@ ENV PIP_DEFAULT_TIMEOUT=300
 ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 RUN pip install --no-cache-dir --timeout 300 --retries 5 -r requirements.txt
 
-# Код: backend + miniapp + admin + bot + shared
+# Код: backend + miniapp (с встроенной админкой) + bot + shared
 COPY backend ./backend
 COPY miniapp ./miniapp
-COPY admin ./admin
 COPY bot ./bot
 COPY shared ./shared
 

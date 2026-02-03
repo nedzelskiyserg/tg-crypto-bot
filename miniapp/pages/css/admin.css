@@ -1,0 +1,604 @@
+/* ========================================
+   ADMIN PANEL PAGE STYLES
+   ======================================== */
+
+/* Admin Content */
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 28px;
+    padding-top: calc(97.92px + 20px);
+    padding-bottom: 24px;
+    box-sizing: border-box;
+}
+
+/* ========================================
+   ADMIN TABS
+   ======================================== */
+.admin-tabs {
+    display: flex;
+    background-color: var(--color-bg-card);
+    height: 44px;
+    overflow: hidden;
+}
+
+.admin-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.admin-tab span {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    transition: all var(--transition-fast);
+}
+
+.admin-tab.active {
+    background-color: var(--color-accent);
+}
+
+.admin-tab.active span {
+    font-weight: 600;
+    color: var(--color-bg);
+}
+
+.admin-tab:not(.active):active {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ========================================
+   TAB CONTENT
+   ======================================== */
+.admin-tab-content {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.admin-tab-content.active {
+    display: flex;
+    animation: adminFadeIn 0.3s ease forwards;
+}
+
+@keyframes adminFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ========================================
+   SECTIONS
+   ======================================== */
+.admin-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.admin-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ========================================
+   RATE SETTINGS
+   ======================================== */
+.admin-rates-info {
+    background-color: var(--color-bg-card);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-rate-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-rate-label {
+    font-family: var(--font-family);
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.admin-rate-value {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.admin-rate-value.accent {
+    color: var(--color-accent);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* Markup Form */
+.admin-markup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-input-label {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.admin-input-wrap {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-bg-card);
+    height: 48px;
+    padding: 0 16px;
+}
+
+.admin-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-family);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    width: 100%;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+
+.admin-input::placeholder {
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+.admin-input:focus {
+    outline: none;
+}
+
+.admin-input-wrap:focus-within {
+    outline: 1px solid var(--color-accent);
+}
+
+.admin-input-suffix {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-accent);
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+/* Remove number input spinners */
+.admin-input[type="number"]::-webkit-inner-spin-button,
+.admin-input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Final Rates */
+.admin-final-rates {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Save Button */
+.admin-save-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 52px;
+    background-color: var(--color-accent);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.admin-save-btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+.admin-save-btn:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.admin-save-btn span {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-bg);
+}
+
+/* Updated Info */
+.admin-updated-info {
+    text-align: center;
+    padding: 8px 0;
+}
+
+.admin-updated-info span {
+    font-family: var(--font-family);
+    font-size: 11px;
+    color: var(--color-text-muted);
+}
+
+/* ========================================
+   ORDERS FILTERS
+   ======================================== */
+.admin-orders-filters {
+    background-color: var(--color-bg-card);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.admin-filter-row-double {
+    flex-direction: row;
+    gap: 12px;
+}
+
+.admin-filter-half {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.admin-filter-label {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.admin-select {
+    background-color: var(--color-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+    font-family: var(--font-family);
+    font-size: 13px;
+    height: 40px;
+    padding: 0 12px;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+}
+
+.admin-select:focus {
+    border-color: var(--color-accent);
+}
+
+.admin-input-sm {
+    height: 40px;
+    padding: 0 12px;
+    background-color: var(--color-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+}
+
+.admin-input-sm:focus {
+    border-color: var(--color-accent);
+}
+
+/* Date input styling */
+input[type="date"].admin-input-sm {
+    color-scheme: dark;
+}
+
+/* Filter Actions */
+.admin-filter-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.admin-filter-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    background-color: var(--color-accent);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.admin-filter-btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+.admin-filter-btn span {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--color-bg);
+}
+
+.admin-filter-btn-reset {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.admin-filter-btn-reset span {
+    color: var(--color-text-muted);
+}
+
+.admin-filter-btn-reset:active {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ========================================
+   ORDERS LIST
+   ======================================== */
+.admin-orders-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-orders-total {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-accent);
+    margin-left: auto;
+}
+
+/* Order Card */
+.admin-order-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    cursor: default;
+}
+
+.admin-order-card:last-child {
+    border-bottom: none;
+}
+
+.admin-order-accent {
+    width: 3px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.admin-order-accent.status-pending {
+    background-color: var(--color-accent);
+}
+
+.admin-order-accent.status-confirmed {
+    background-color: #4CAF50;
+}
+
+.admin-order-accent.status-rejected {
+    background-color: #6b7280;
+}
+
+.admin-order-accent.status-cancelled {
+    background-color: #6b7280;
+}
+
+.admin-order-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.admin-order-title {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-order-meta {
+    font-family: var(--font-family);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-order-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.admin-order-badge {
+    font-family: var(--font-family);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 2px;
+}
+
+.admin-order-badge.badge-pending {
+    background-color: rgba(212, 175, 55, 0.15);
+    color: var(--color-accent);
+}
+
+.admin-order-badge.badge-confirmed {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: #4CAF50;
+}
+
+.admin-order-badge.badge-rejected {
+    background-color: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+}
+
+.admin-order-badge.badge-cancelled {
+    background-color: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+}
+
+.admin-order-date {
+    font-family: var(--font-family);
+    font-size: 10px;
+    color: var(--color-text-muted);
+}
+
+/* ========================================
+   PAGINATION
+   ======================================== */
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.admin-page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-bg-card);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.admin-page-btn:active {
+    transform: scale(0.95);
+}
+
+.admin-page-btn:disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.admin-page-btn svg {
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-primary);
+}
+
+.admin-page-info {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    min-width: 60px;
+    text-align: center;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+.admin-orders-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 40px 24px;
+    background-color: var(--color-bg-card);
+}
+
+/* ========================================
+   LOADING STATE
+   ======================================== */
+.admin-loading {
+    padding: 32px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-family: var(--font-family);
+    font-size: 13px;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+.admin-tabs {
+    animation: adminSlideIn 0.3s ease forwards;
+}
+
+.admin-section {
+    animation: adminSlideIn 0.3s ease 0.1s forwards;
+    opacity: 0;
+}
+
+@keyframes adminSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Order card stagger animation */
+.admin-order-card {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.admin-order-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
