@@ -67,7 +67,7 @@ async def menu_handler(callback: CallbackQuery) -> None:
         # Если это сообщение, отправляем новое текстовое сообщение
         if menu_item.menu_type == "message":
             # Выводим только текст из таблицы, без breadcrumbs
-            text = menu_item.text
+            text = await process_dynamic_text(menu_item.text)
             
             # Получаем кнопки, привязанные к этому сообщению (дочерние элементы)
             # Создаем клавиатуру вручную для правильной кнопки "Назад"
@@ -136,7 +136,7 @@ async def menu_handler(callback: CallbackQuery) -> None:
             # Если есть дочерний message, сразу отправляем его
             if child_message:
                 # Выводим только текст из таблицы, без breadcrumbs
-                text = child_message.text
+                text = await process_dynamic_text(child_message.text)
                 
                 # Получаем кнопки, привязанные к этому message (дочерние элементы message)
                 # Создаем клавиатуру вручную, чтобы кнопка "Назад" возвращала к mess_button

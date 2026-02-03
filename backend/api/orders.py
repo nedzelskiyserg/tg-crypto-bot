@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from backend.api.deps import DbSession, CurrentUser
 from backend.bot.bot import get_bot
 from backend.models.order import Order, OrderStatus
-from backend.schemas.order import OrderCreate, OrderResponse
+from backend.schemas.order import OrderCreate, OrderResponse, AdminOrderUpdateResponse
 from backend.services.notification import notify_admins_new_order
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -115,18 +115,19 @@ class AdminOrderUpdate(BaseModel):
     admin_id: int
 
 
-@router.patch("/admin/{order_id}", response_model=OrderResponse)
+@router.patch("/admin/{order_id}", response_model=AdminOrderUpdateResponse)
 async def admin_update_order_status(
     order_id: int,
     body: AdminOrderUpdate,
     db: DbSession,
-) -> Order:
+) -> dict:
     """
     Update order status by admin (confirm/reject).
-    Used by bot for processing order callbacks.
+    Returns order data + all notification message IDs for cross-admin editing.
     """
     from sqlalchemy import select
     from backend.services.admin_loader import load_admin_ids
+    from backend.models.notification import OrderNotification
 
     # Verify admin
     admin_ids = load_admin_ids()
@@ -158,4 +159,14 @@ async def admin_update_order_status(
     order.status = body.status
     await db.commit()
     await db.refresh(order)
-    return order
+
+    # Get all notification message IDs for this order
+    notif_result = await db.execute(
+        select(OrderNotification).where(OrderNotification.order_id == order_id)
+    )
+    notifications = [
+        {"admin_id": n.admin_id, "message_id": n.message_id}
+        for n in notif_result.scalars().all()
+    ]
+
+    return {"order": order, "notifications": notifications}

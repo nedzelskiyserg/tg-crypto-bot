@@ -46,3 +46,15 @@ class OrderResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class NotificationInfo(BaseModel):
+    """Info about a sent admin notification message"""
+    admin_id: int
+    message_id: int
+
+
+class AdminOrderUpdateResponse(BaseModel):
+    """Response for admin order update - includes notification IDs for cross-admin editing"""
+    order: OrderResponse
+    notifications: list[NotificationInfo] = []

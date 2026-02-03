@@ -4,7 +4,9 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from backend.models.order import Order
 from backend.models.user import User
+from backend.models.notification import OrderNotification
 from backend.services.admin_loader import load_admin_ids
+from backend.database import async_session_maker
 
 
 def format_amount(value: Decimal, decimals: int = 2) -> str:
@@ -91,14 +93,31 @@ async def notify_admins_new_order(bot, order: Order, user: User) -> None:
         ]
     )
 
-    # Send to all admins
+    # Send to all admins and track message IDs
+    sent_notifications = []
     for admin_id in admin_ids:
         try:
-            await bot.send_message(
+            sent_msg = await bot.send_message(
                 chat_id=admin_id,
                 text=message,
                 parse_mode="HTML",
                 reply_markup=keyboard
             )
+            sent_notifications.append(
+                OrderNotification(
+                    order_id=order.id,
+                    admin_id=admin_id,
+                    message_id=sent_msg.message_id
+                )
+            )
         except Exception as e:
             print(f"Failed to send notification to admin {admin_id}: {e}")
+
+    # Save message IDs to DB for cross-admin message editing
+    if sent_notifications:
+        try:
+            async with async_session_maker() as db:
+                db.add_all(sent_notifications)
+                await db.commit()
+        except Exception as e:
+            print(f"Failed to save notification message IDs: {e}")
