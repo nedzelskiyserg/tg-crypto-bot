@@ -6,7 +6,8 @@
 // Initialize Telegram WebApp
 const tg = window.Telegram?.WebApp;
 
-// API Configuration
+// API Configuration (rates are now fetched from backend which applies markup formula)
+// External API is called server-side by backend, not from frontend.
 const RATE_API_CONFIG = {
     url: 'https://mosca.moscow/api/v1/rate/',
     accessToken: 'HZAKlDuHaMD5sRpWgeciz6OxeK8b7h76NJHdeqi_OdurDRJBv1mJy4iuyz53wgZRbEmxCiKTojNYgLmRhIzqlA'
@@ -444,57 +445,56 @@ function applyRatesToUI() {
 }
 
 /**
- * Update rate from API (external first, on error — fallback to backend /api/rate from Settings)
+ * Update rate from backend API (which fetches external rate + applies admin markup formula).
+ * Fallback: direct external API call (without markup).
  */
 async function updateRate() {
     setRateLoading(true);
 
     let data = null;
-    let response = null;
 
+    // Primary: backend /api/rate (applies markup formula from admin panel)
     try {
-        response = await fetch(RATE_API_CONFIG.url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Accept-Language': 'ru',
-                'access-token': RATE_API_CONFIG.accessToken
-            }
-        });
-
+        const baseUrl = getBackendApiBaseUrl();
+        const response = await fetch(baseUrl + '/rate', { method: 'GET', headers: { 'Accept': 'application/json' } });
         if (response.ok) {
             const json = await response.json();
-            if (json && typeof json.buy === 'number' && typeof json.sell === 'number') {
-                data = { buy: json.buy, sell: json.sell };
-            }
-        }
-        if (!data) {
-            const now = Date.now();
-            if (now - lastRateErrorLog > RATE_ERROR_LOG_INTERVAL) {
-                console.warn('Rate API unavailable (' + (response ? response.status : 'error') + '), using fallback from Settings');
-                lastRateErrorLog = now;
+            if (json && (typeof json.buy === 'number' || json.buy != null) && (typeof json.sell === 'number' || json.sell != null)) {
+                data = { buy: parseFloat(json.buy), sell: parseFloat(json.sell) };
             }
         }
     } catch (error) {
         const now = Date.now();
         if (now - lastRateErrorLog > RATE_ERROR_LOG_INTERVAL) {
-            console.warn('Rate API failed:', error.message || error, '— using fallback from Settings');
+            console.warn('Backend rate API failed:', error.message || error, '— trying external API');
             lastRateErrorLog = now;
         }
     }
 
+    // Fallback: direct external API (without markup)
     if (!data) {
         try {
-            const baseUrl = getBackendApiBaseUrl();
-            const fallbackResponse = await fetch(baseUrl + '/rate', { method: 'GET', headers: { 'Accept': 'application/json' } });
-            if (fallbackResponse.ok) {
-                const json = await fallbackResponse.json();
-                if (json && (typeof json.buy === 'number' || json.buy != null) && (typeof json.sell === 'number' || json.sell != null)) {
-                    data = { buy: parseFloat(json.buy), sell: parseFloat(json.sell) };
+            const response = await fetch(RATE_API_CONFIG.url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Accept-Language': 'ru',
+                    'access-token': RATE_API_CONFIG.accessToken
+                }
+            });
+
+            if (response.ok) {
+                const json = await response.json();
+                if (json && typeof json.buy === 'number' && typeof json.sell === 'number') {
+                    data = { buy: json.buy, sell: json.sell };
                 }
             }
-        } catch (fallbackError) {
-            console.warn('Fallback rate API failed:', fallbackError?.message || fallbackError);
+        } catch (error) {
+            const now = Date.now();
+            if (now - lastRateErrorLog > RATE_ERROR_LOG_INTERVAL) {
+                console.warn('External rate API also failed:', error.message || error);
+                lastRateErrorLog = now;
+            }
         }
     }
 

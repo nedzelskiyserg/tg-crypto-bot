@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:mosca.moscow)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(npm install)",
+      "Bash(npm run build)",
+      "Bash(pkill:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(chmod:*)",
+      "Bash(/Users/serg.nedzelskiy/Documents/Работа/TG CRYPTO BOT/scripts/stop_tma.sh)",
+      "Bash(bash:*)",
+      "Bash(git -C \"/Users/serg.nedzelskiy/Documents/Работа/TG CRYPTO BOT\" log --oneline -20)",
+      "Bash(git -C \"/Users/serg.nedzelskiy/Documents/Работа/TG CRYPTO BOT\" diff bd71f32..HEAD -- backend/models/ backend/schemas/)"
+    ]
+  }
+}

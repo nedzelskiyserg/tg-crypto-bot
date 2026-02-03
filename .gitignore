@@ -4,8 +4,6 @@
 # Google Service Account credentials
 credentials.json
 *-credentials.json
-*.json
-!package.json
 
 # Python
 __pycache__/
@@ -57,9 +55,9 @@ main.py.backup
 # Docker
 .dockerignore
 
-# Database
-data/
-*.db
+# Database and runtime data
+data/app.db
+data/rate_markup.json
 
 # Node modules (frontend)
 node_modules/

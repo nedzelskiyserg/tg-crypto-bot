@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="280" height="60">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&amp;display=swap');
+      .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 42px; font-weight: 700; letter-spacing: -1px; fill: #FFFFFF; }
+      .tagline { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; fill: #D4AF37; }
+    </style>
+  </defs>
+  <text x="0" y="42" class="logo-text">NONAME EX</text>
+  <text x="47" y="57" class="tagline">CRYPTO EXCHANGE</text>
+</svg>

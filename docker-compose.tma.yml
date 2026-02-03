@@ -1,8 +1,8 @@
-# TG CRYPTO BOT — Telegram Mini App + Backend API + Bot
-# Запуск: docker compose -f docker-compose.tma.yml up -d
+# TG CRYPTO BOT — Telegram Mini App + Backend API + Admin Panel + Bot
+# Запуск: docker compose -f docker-compose.tma.yml up -d --build
 
 services:
-  # FastAPI backend (API + Mini App static files)
+  # FastAPI backend (API + Mini App + Admin Panel static files)
   app:
     build:
       context: .
