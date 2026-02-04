@@ -50,7 +50,7 @@ async def notify_admins_new_order(bot, order: Order, user: User) -> None:
     if is_buy:
         # Buy mode: user sends RUB, receives USDT to wallet
         message = f"""{order_type}
-Ордер #{order.id}
+Заявка #{order.id}
 
 👤 Пользователь: {username_display}
 📋 ФИО: <code>{order.full_name}</code>
@@ -66,7 +66,7 @@ async def notify_admins_new_order(bot, order: Order, user: User) -> None:
     else:
         # Sell mode: user sends USDT, receives RUB
         message = f"""{order_type}
-Ордер #{order.id}
+Заявка #{order.id}
 
 👤 Пользователь: {username_display}
 📋 ФИО: <code>{order.full_name}</code>

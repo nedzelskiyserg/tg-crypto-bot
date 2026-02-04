@@ -369,11 +369,11 @@
     height: 18px;
     padding: 0 5px;
     border-radius: 9px;
-    background-color: var(--color-accent);
+    background-color: var(--color-accent, #3b82f6);
     font-family: var(--font-family);
     font-size: 10px;
     font-weight: 700;
-    color: var(--color-bg);
+    color: var(--color-bg, #fff);
     line-height: 1;
 }
 
@@ -509,6 +509,12 @@
 }
 
 /* Status Chips */
+.admin-type-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
 .admin-status-chips {
     display: flex;
     flex-wrap: wrap;
@@ -557,11 +563,11 @@
 }
 
 .admin-status-dot.dot-rejected {
-    background-color: #EF5350;
+    background-color: #6b7280;
 }
 
 .admin-status-dot.dot-cancelled {
-    background-color: #6b7280;
+    background-color: #dc2626;
 }
 
 /* Period Presets */
@@ -667,6 +673,7 @@
 
 .admin-amount-input {
     flex: 1;
+    min-height: 44px;
     background: transparent;
     border: none;
     outline: none;
@@ -677,6 +684,7 @@
     width: 100%;
     -webkit-appearance: none;
     -moz-appearance: textfield;
+    box-sizing: border-box;
 }
 
 .admin-amount-input::placeholder {
@@ -784,7 +792,7 @@
 }
 
 .admin-order-accent.status-cancelled {
-    background-color: #6b7280;
+    background-color: #dc2626;
 }
 
 .admin-order-info {
@@ -847,8 +855,8 @@
 }
 
 .admin-order-badge.badge-cancelled {
-    background-color: rgba(107, 114, 128, 0.15);
-    color: #6b7280;
+    background-color: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
 }
 
 .admin-order-date {
@@ -1155,8 +1163,8 @@
 }
 
 .admin-detail-badge.badge-cancelled {
-    background-color: rgba(107, 114, 128, 0.2);
-    color: #6b7280;
+    background-color: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
 }
 
 /* Detail rows */

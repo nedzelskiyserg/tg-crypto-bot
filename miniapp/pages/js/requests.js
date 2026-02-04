@@ -133,7 +133,7 @@ function mapApiOrderToRequest(apiOrder) {
         status: mapApiStatus(apiOrder.status),
         date: dateStr,
         time: timeStr,
-        requestId: '#NE-' + (created.getFullYear()) + '-' + String(apiOrder.id).padStart(5, '0'),
+        requestId: '#' + apiOrder.id,
         walletAddress: apiOrder.wallet_address || '',
         bankCard: apiOrder.bank_card || ''
     };
