@@ -1027,34 +1027,49 @@ let adminPageLoaded = false;
 let adminStylesLoaded = false;
 let adminScriptLoaded = false;
 
+function getAdminPageBaseUrl() {
+    const path = window.location.pathname || '/';
+    const dir = path.endsWith('/') ? path.slice(0, -1) : path.replace(/\/[^/]*$/, '');
+    const base = (dir ? dir + '/' : '/');
+    return window.location.origin + base;
+}
+
 async function loadAdminPage() {
     const container = document.getElementById('pageAdminContainer');
     if (!container) return;
 
-    // Load CSS if not loaded
+    const baseUrl = getAdminPageBaseUrl();
+    if (!baseUrl) return;
+
+    // Load CSS if not loaded (cache-bust for updates)
     if (!adminStylesLoaded) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'pages/css/admin.css';
+        link.href = baseUrl + 'pages/css/admin.css?v=2';
         document.head.appendChild(link);
         adminStylesLoaded = true;
     }
 
-    // Always fetch latest HTML so updates (e.g. filters page) are visible
+    // Always fetch latest HTML; use absolute URL + cache-bust so updates are visible
+    const adminHtmlUrl = baseUrl + 'pages/admin.html?t=' + Date.now();
     try {
-        const response = await fetch('pages/admin.html', { cache: 'no-store' });
+        const response = await fetch(adminHtmlUrl, { cache: 'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
         const html = await response.text();
+        if (!html || html.indexOf('admin-filters-open-btn') === -1) {
+            console.warn('Admin HTML may be outdated (missing admin-filters-open-btn)');
+        }
         container.innerHTML = html;
     } catch (error) {
         console.error('Failed to load admin page:', error);
         return;
     }
 
-    // Load JS if not loaded
+    // Load JS if not loaded (use baseUrl + version so updates are picked up)
     if (!adminScriptLoaded) {
         return new Promise((resolve) => {
             const script = document.createElement('script');
-            script.src = 'pages/js/admin.js';
+            script.src = baseUrl + 'pages/js/admin.js?v=2';
             script.onload = () => {
                 adminScriptLoaded = true;
                 if (window.initAdminPage) {
