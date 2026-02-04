@@ -144,6 +144,21 @@
                         <button class="admin-filters-reset-link" id="adminResetFilters">Сбросить</button>
                     </div>
 
+                    <!-- Type Filter -->
+                    <div class="admin-filter-group">
+                        <label class="admin-filter-group-label">ТИП ОПЕРАЦИИ</label>
+                        <div class="admin-type-chips" id="adminTypeChips">
+                            <button class="admin-status-chip" data-type="buy">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                                Покупка
+                            </button>
+                            <button class="admin-status-chip" data-type="sell">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                                Продажа
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Status Filter -->
                     <div class="admin-filter-group">
                         <label class="admin-filter-group-label">СТАТУС</label>
@@ -164,6 +179,15 @@
                                 <span class="admin-status-dot dot-cancelled"></span>
                                 Отменено
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Order ID Filter -->
+                    <div class="admin-filter-group">
+                        <label class="admin-filter-group-label">ID ЗАЯВКИ</label>
+                        <div class="admin-amount-field" style="max-width:180px;">
+                            <span class="admin-amount-currency" style="margin-left:0;margin-right:6px;">#</span>
+                            <input type="number" id="adminFilterOrderId" class="admin-amount-input" placeholder="Номер заявки" inputmode="numeric" />
                         </div>
                     </div>
 
@@ -211,6 +235,80 @@
                         </button>
                     </div>
                 </section>
+            </div>
+        </div>
+
+        <!-- Order Detail Modal -->
+        <div class="admin-modal" id="adminOrderModal">
+            <div class="admin-modal-overlay" data-action="close-admin-modal"></div>
+            <div class="admin-modal-content">
+                <div class="admin-modal-drag-handle"></div>
+                <div class="admin-modal-header">
+                    <h3>Детали заявки</h3>
+                    <button class="admin-modal-close" data-action="close-admin-modal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="admin-modal-body">
+                    <div class="admin-modal-status" id="adminModalStatus">
+                        <span class="admin-detail-badge">—</span>
+                    </div>
+
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">Тип операции</span>
+                        <span class="admin-detail-value" id="adminModalType">—</span>
+                    </div>
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">Сумма отправки</span>
+                        <span class="admin-detail-value" id="adminModalSend">—</span>
+                    </div>
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">Сумма получения</span>
+                        <span class="admin-detail-value accent" id="adminModalReceive">—</span>
+                    </div>
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">Курс</span>
+                        <span class="admin-detail-value" id="adminModalRate">—</span>
+                    </div>
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">Дата создания</span>
+                        <span class="admin-detail-value" id="adminModalDate">—</span>
+                    </div>
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">ID заявки</span>
+                        <span class="admin-detail-value mono" id="adminModalId">—</span>
+                    </div>
+                    <div class="admin-detail-row" id="adminModalWalletRow" style="display:none;">
+                        <span class="admin-detail-label">Кошелёк TRC-20</span>
+                        <span class="admin-detail-value mono" id="adminModalWallet"></span>
+                    </div>
+                    <div class="admin-detail-row" id="adminModalCardRow" style="display:none;">
+                        <span class="admin-detail-label">Банковская карта</span>
+                        <span class="admin-detail-value mono" id="adminModalCard"></span>
+                    </div>
+
+                    <div class="admin-detail-separator"></div>
+
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">Telegram ID</span>
+                        <span class="admin-detail-value mono" id="adminModalTgId">—</span>
+                    </div>
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">ФИО</span>
+                        <span class="admin-detail-value" id="adminModalName">—</span>
+                    </div>
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">Телефон</span>
+                        <span class="admin-detail-value mono" id="adminModalPhone">—</span>
+                    </div>
+                    <div class="admin-detail-row">
+                        <span class="admin-detail-label">Email</span>
+                        <span class="admin-detail-value mono" id="adminModalEmail">—</span>
+                    </div>
+                </div>
             </div>
         </div>
     </main>

@@ -33,8 +33,11 @@ window.adminState = {
     ordersTotal: 0,
     filtersOpen: false,
     selectedPeriod: 'all',
+    selectedOrder: null,
     filters: {
         status: '',
+        type: '',
+        orderId: '',
         amountMin: '',
         amountMax: '',
         dateFrom: '',
@@ -43,6 +46,8 @@ window.adminState = {
     // Draft filters (edited on filters page, applied on "ПОКАЗАТЬ")
     draftFilters: {
         status: '',
+        type: '',
+        orderId: '',
         amountMin: '',
         amountMax: '',
         dateFrom: '',
@@ -289,10 +294,19 @@ function closeFiltersPage() {
 function syncDraftFiltersToUI() {
     var st = window.adminState;
 
+    // Type chips
+    document.querySelectorAll('#adminTypeChips .admin-status-chip').forEach(function (chip) {
+        chip.classList.toggle('selected', chip.dataset.type === st.draftFilters.type);
+    });
+
     // Status chips
     document.querySelectorAll('#adminStatusChips .admin-status-chip').forEach(function (chip) {
         chip.classList.toggle('selected', chip.dataset.status === st.draftFilters.status);
     });
+
+    // Order ID
+    var orderIdEl = document.getElementById('adminFilterOrderId');
+    if (orderIdEl) orderIdEl.value = st.draftFilters.orderId || '';
 
     // Period presets
     document.querySelectorAll('#adminPeriodPresets .admin-period-btn').forEach(function (btn) {
@@ -303,7 +317,6 @@ function syncDraftFiltersToUI() {
     var customEl = document.getElementById('adminPeriodCustom');
     if (customEl) {
         var isCustom = st.draftPeriod === 'all' || !st.draftPeriod;
-        // Show custom dates only when period is "all" and dates are set, or always show for manual entry
         customEl.classList.toggle('visible', isCustom && (st.draftFilters.dateFrom || st.draftFilters.dateTo));
     }
 
@@ -405,7 +418,9 @@ function toggleCustomDates() {
 function getActiveFilterCount() {
     var st = window.adminState;
     var count = 0;
+    if (st.filters.type) count++;
     if (st.filters.status) count++;
+    if (st.filters.orderId) count++;
     if (st.filters.amountMin || st.filters.amountMax) count++;
     if (st.filters.dateFrom || st.filters.dateTo) count++;
     return count;
@@ -422,11 +437,27 @@ function renderActiveFilterChips() {
 
     var chips = [];
 
+    // Type chip
+    if (st.filters.type) {
+        chips.push({
+            key: 'type',
+            text: st.filters.type === 'buy' ? 'Покупка' : 'Продажа'
+        });
+    }
+
     // Status chip
     if (st.filters.status) {
         chips.push({
             key: 'status',
             text: adminStatusLabelsShort[st.filters.status] || st.filters.status
+        });
+    }
+
+    // Order ID chip
+    if (st.filters.orderId) {
+        chips.push({
+            key: 'orderId',
+            text: 'ID #' + st.filters.orderId
         });
     }
 
@@ -509,9 +540,15 @@ function removeFilterChip(key) {
     } else if (key === 'amount') {
         st.filters.amountMin = '';
         st.filters.amountMax = '';
+    } else if (key === 'type') {
+        st.filters.type = '';
+    } else if (key === 'orderId') {
+        st.filters.orderId = '';
     }
 
     st.ordersPage = 1;
+    // Update chips immediately so the removed chip disappears before API loads
+    renderActiveFilterChips();
     loadAdminOrders();
     if (window.hapticFeedback) window.hapticFeedback('light');
 }
@@ -542,6 +579,7 @@ async function loadAdminOrders() {
     params.set('page_size', st.ordersPageSize);
 
     if (st.filters.status) params.set('status', st.filters.status);
+    if (st.filters.orderId) params.set('order_id', st.filters.orderId);
     if (st.filters.amountMin) params.set('amount_min', st.filters.amountMin);
     if (st.filters.amountMax) params.set('amount_max', st.filters.amountMax);
     if (st.filters.dateFrom) params.set('date_from', st.filters.dateFrom);
@@ -604,7 +642,23 @@ function renderAdminOrders() {
     listEl.style.display = '';
     if (emptyEl) emptyEl.style.display = 'none';
 
-    st.orders.forEach(function (order, index) {
+    // Client-side type filter
+    var filteredOrders = st.orders;
+    if (st.filters.type) {
+        filteredOrders = st.orders.filter(function (order) {
+            var isBuy = (order.currency_from || '').toUpperCase() === 'RUB';
+            return st.filters.type === 'buy' ? isBuy : !isBuy;
+        });
+    }
+
+    if (filteredOrders.length === 0) {
+        listEl.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'flex';
+        if (paginationEl) paginationEl.style.display = 'none';
+        return;
+    }
+
+    filteredOrders.forEach(function (order, index) {
         const isBuy = (order.currency_from || '').toUpperCase() === 'RUB';
         const title = isBuy ? 'Покупка USDT' : 'Продажа USDT';
         const sendStr = formatAdminAmount(order.amount_from) + ' ' + (order.currency_from || '');
@@ -617,12 +671,13 @@ function renderAdminOrders() {
 
         const card = document.createElement('div');
         card.className = 'admin-order-card';
+        card.dataset.orderId = order.id;
         card.innerHTML =
             '<div class="admin-order-accent status-' + escapeAttr(status) + '"></div>' +
             '<div class="admin-order-info">' +
                 '<span class="admin-order-title">#' + order.id + ' ' + escapeHtmlAdmin(title) + '</span>' +
                 '<span class="admin-order-meta">' + escapeHtmlAdmin(sendStr) + ' → ' + escapeHtmlAdmin(receiveStr) + '</span>' +
-                '<span class="admin-order-meta">TG: ' + (order.telegram_id || '—') + '</span>' +
+                '<span class="admin-order-meta">TG: ' + (order.user_id || '—') + '</span>' +
             '</div>' +
             '<div class="admin-order-right">' +
                 '<span class="admin-order-badge badge-' + escapeAttr(status) + '">' + escapeHtmlAdmin(badgeText) + '</span>' +
@@ -675,6 +730,13 @@ function switchAdminTab(tabName) {
     if (!['rates', 'orders'].includes(tabName)) return;
     window.adminState.currentTab = tabName;
 
+    // Always reset filters view when switching tabs
+    var filtersView = document.getElementById('adminFiltersView');
+    var listView = document.getElementById('adminOrdersListView');
+    if (filtersView) filtersView.classList.remove('visible');
+    if (listView) listView.classList.remove('hidden');
+    window.adminState.filtersOpen = false;
+
     // Update tab buttons
     document.querySelectorAll('#pageAdmin .admin-tab').forEach(function (tab) {
         tab.classList.toggle('active', tab.dataset.adminTab === tabName);
@@ -685,7 +747,7 @@ function switchAdminTab(tabName) {
         content.classList.toggle('active', content.dataset.tab === tabName);
     });
 
-    // Load data on first switch
+    // Load data on switch
     if (tabName === 'rates') {
         loadRateSettings();
     } else if (tabName === 'orders') {
@@ -754,8 +816,34 @@ function adminGlobalClickHandler(e) {
         return;
     }
 
+    // Modal close
+    if (e.target.closest('[data-action="close-admin-modal"]')) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeAdminOrderModal();
+        return;
+    }
+
+    // Order card click -> open modal
+    var orderCard = e.target.closest('.admin-order-card');
+    if (orderCard && orderCard.dataset.orderId) {
+        e.preventDefault();
+        e.stopPropagation();
+        openAdminOrderModal(Number(orderCard.dataset.orderId));
+        return;
+    }
+
+    // Type chip toggle
+    var typeChip = e.target.closest('#adminTypeChips .admin-status-chip');
+    if (typeChip && typeChip.dataset.type) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleTypeChip(typeChip.dataset.type);
+        return;
+    }
+
     // Status chip toggle
-    var statusChip = e.target.closest('.admin-status-chip');
+    var statusChip = e.target.closest('#adminStatusChips .admin-status-chip');
     if (statusChip && statusChip.dataset.status) {
         e.preventDefault();
         e.stopPropagation();
@@ -826,6 +914,7 @@ function applyOrderFilters() {
     var st = window.adminState;
 
     // Read current draft input values
+    st.draftFilters.orderId = document.getElementById('adminFilterOrderId')?.value || '';
     st.draftFilters.amountMin = document.getElementById('adminFilterAmountMin')?.value || '';
     st.draftFilters.amountMax = document.getElementById('adminFilterAmountMax')?.value || '';
 
@@ -850,11 +939,202 @@ function applyOrderFilters() {
 
 function resetOrderFilters() {
     var st = window.adminState;
-    st.draftFilters = { status: '', amountMin: '', amountMax: '', dateFrom: '', dateTo: '' };
+    st.draftFilters = { status: '', type: '', orderId: '', amountMin: '', amountMax: '', dateFrom: '', dateTo: '' };
     st.draftPeriod = 'all';
 
     // Reset UI
     syncDraftFiltersToUI();
+    if (window.hapticFeedback) window.hapticFeedback('light');
+}
+
+// ============================================
+// ORDER DETAIL MODAL
+// ============================================
+
+function openAdminOrderModal(orderId) {
+    var st = window.adminState;
+    var order = st.orders.find(function (o) { return o.id == orderId; });
+    if (!order) {
+        adminError('Order not found', orderId);
+        return;
+    }
+
+    st.selectedOrder = orderId;
+    var modal = document.getElementById('adminOrderModal');
+    if (!modal) return;
+
+    var isBuy = (order.currency_from || '').toUpperCase() === 'RUB';
+    var title = isBuy ? 'Покупка USDT' : 'Продажа USDT';
+    var status = order.status || 'pending';
+    var badgeText = adminStatusLabels[status] || status.toUpperCase();
+    var created = order.created_at ? new Date(order.created_at) : new Date();
+    var dateStr = created.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    var timeStr = created.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+    // Status badge
+    var badge = modal.querySelector('.admin-detail-badge');
+    if (badge) {
+        badge.textContent = badgeText;
+        badge.className = 'admin-detail-badge badge-' + escapeAttr(status);
+    }
+
+    // Fields
+    setAdminModalText('adminModalType', title);
+    setAdminModalText('adminModalSend', formatAdminAmount(order.amount_from) + ' ' + (order.currency_from || ''));
+    setAdminModalText('adminModalReceive', formatAdminAmount(order.amount_to) + ' ' + (order.currency_to || ''));
+    setAdminModalText('adminModalRate', '1 USDT = ' + Number(order.exchange_rate || 0).toFixed(2) + ' RUB');
+    setAdminModalText('adminModalDate', dateStr + ', ' + timeStr);
+    setAdminModalText('adminModalId', '#' + order.id);
+
+    // Wallet
+    var walletRow = document.getElementById('adminModalWalletRow');
+    if (walletRow) {
+        if (order.wallet_address) {
+            walletRow.style.display = '';
+            setAdminModalText('adminModalWallet', order.wallet_address);
+        } else {
+            walletRow.style.display = 'none';
+        }
+    }
+
+    // Bank card
+    var cardRow = document.getElementById('adminModalCardRow');
+    if (cardRow) {
+        if (order.bank_card) {
+            cardRow.style.display = '';
+            setAdminModalText('adminModalCard', order.bank_card);
+        } else {
+            cardRow.style.display = 'none';
+        }
+    }
+
+    // User info
+    setAdminModalText('adminModalTgId', order.user_id || '—');
+    setAdminModalText('adminModalName', order.full_name || '—');
+    setAdminModalText('adminModalPhone', order.phone || '—');
+    setAdminModalText('adminModalEmail', order.email || '—');
+
+    // Show modal
+    modal.classList.remove('closing');
+    var content = modal.querySelector('.admin-modal-content');
+    if (content) {
+        content.style.transform = '';
+        content.style.transition = '';
+    }
+
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function () { modal.classList.add('active'); });
+
+    adminLog('Modal opened for order', orderId);
+}
+
+function setAdminModalText(id, text) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text || '—';
+}
+
+function closeAdminOrderModal() {
+    var modal = document.getElementById('adminOrderModal');
+    if (!modal || !modal.classList.contains('active')) return;
+
+    var content = modal.querySelector('.admin-modal-content');
+    var overlay = modal.querySelector('.admin-modal-overlay');
+
+    modal.classList.add('closing');
+
+    if (content) {
+        content.style.transition = 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)';
+        content.style.transform = 'translateY(100%)';
+    }
+    if (overlay) {
+        overlay.style.transition = 'background-color 0.3s ease';
+        overlay.style.backgroundColor = 'rgba(0,0,0,0)';
+    }
+
+    setTimeout(function () {
+        modal.classList.remove('active', 'closing');
+        document.body.style.overflow = '';
+        window.adminState.selectedOrder = null;
+        if (content) { content.style.transform = ''; content.style.transition = ''; }
+        if (overlay) { overlay.style.transition = ''; overlay.style.backgroundColor = ''; }
+    }, 300);
+
+    if (window.hapticFeedback) window.hapticFeedback('light');
+}
+
+function setupAdminModalDrag() {
+    var modal = document.getElementById('adminOrderModal');
+    if (!modal) return;
+
+    var content = modal.querySelector('.admin-modal-content');
+    var overlay = modal.querySelector('.admin-modal-overlay');
+    var dragAreas = [modal.querySelector('.admin-modal-drag-handle'), modal.querySelector('.admin-modal-header')].filter(Boolean);
+
+    if (!content || dragAreas.length === 0) return;
+
+    var dragging = false, startY = 0, currentY = 0;
+
+    var onStart = function (e) {
+        if (!modal.classList.contains('active')) return;
+        dragging = true;
+        startY = e.touches[0].clientY;
+        currentY = 0;
+        content.style.transition = 'none';
+        if (overlay) overlay.style.transition = 'none';
+    };
+
+    var onMove = function (e) {
+        if (!dragging) return;
+        var dy = e.touches[0].clientY - startY;
+        if (dy > 0) {
+            e.preventDefault();
+            currentY = dy;
+            content.style.transform = 'translateY(' + (dy * 0.5) + 'px)';
+            if (overlay) overlay.style.backgroundColor = 'rgba(0,0,0,' + Math.max(0, 0.6 - dy / 400) + ')';
+        }
+    };
+
+    var onEnd = function () {
+        if (!dragging) return;
+        dragging = false;
+        if (currentY > 80) {
+            closeAdminOrderModal();
+        } else {
+            content.style.transition = 'transform 0.2s ease';
+            content.style.transform = 'translateY(0)';
+            if (overlay) {
+                overlay.style.transition = 'background-color 0.2s ease';
+                overlay.style.backgroundColor = 'rgba(0,0,0,0.6)';
+            }
+            setTimeout(function () {
+                content.style.transition = '';
+                if (overlay) overlay.style.transition = '';
+            }, 200);
+        }
+        currentY = 0;
+    };
+
+    dragAreas.forEach(function (area) {
+        area.addEventListener('touchstart', onStart, { passive: true });
+        area.addEventListener('touchmove', onMove, { passive: false });
+        area.addEventListener('touchend', onEnd, { passive: true });
+    });
+
+    adminLog('Modal drag setup complete');
+}
+
+function toggleTypeChip(type) {
+    var st = window.adminState;
+    if (st.draftFilters.type === type) {
+        st.draftFilters.type = '';
+    } else {
+        st.draftFilters.type = type;
+    }
+
+    document.querySelectorAll('#adminTypeChips .admin-status-chip').forEach(function (chip) {
+        chip.classList.toggle('selected', chip.dataset.type === st.draftFilters.type);
+    });
+
     if (window.hapticFeedback) window.hapticFeedback('light');
 }
 
@@ -878,6 +1158,9 @@ window.initAdminPage = function () {
     const sellInput = document.getElementById('adminSellMarkup');
     if (buyInput) buyInput.addEventListener('input', recalcFinalRates);
     if (sellInput) sellInput.addEventListener('input', recalcFinalRates);
+
+    // Setup modal drag
+    setupAdminModalDrag();
 
     // Load rate settings on init (default tab is rates)
     loadRateSettings();

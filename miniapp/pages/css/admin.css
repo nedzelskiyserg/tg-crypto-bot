@@ -759,7 +759,6 @@
     gap: 12px;
     padding: 14px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    cursor: default;
 }
 
 .admin-order-card:last-child {
@@ -942,6 +941,12 @@
     opacity: 0;
 }
 
+/* Filters page section must not use the fade-in animation — it has its own */
+.admin-filters-page .admin-section {
+    animation: none;
+    opacity: 1;
+}
+
 @keyframes adminSlideIn {
     from {
         opacity: 0;
@@ -958,9 +963,245 @@
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+}
+
+.admin-order-card:active {
+    background-color: rgba(255, 255, 255, 0.03);
 }
 
 .admin-order-card.visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* ========================================
+   ORDER DETAIL MODAL
+   ======================================== */
+.admin-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.admin-modal.active {
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.admin-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+    transition: background-color 0.3s ease;
+}
+
+.admin-modal.active .admin-modal-overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.admin-modal.closing .admin-modal-overlay {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.admin-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    max-height: 85vh;
+    background-color: var(--color-bg-card);
+    border-radius: 12px 12px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+    overflow: hidden;
+}
+
+.admin-modal.active .admin-modal-content {
+    transform: translateY(0);
+}
+
+.admin-modal.closing .admin-modal-content {
+    transform: translateY(100%);
+}
+
+/* Drag handle */
+.admin-modal-drag-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    cursor: grab;
+    touch-action: none;
+    z-index: 10;
+}
+
+.admin-modal-drag-handle::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.admin-modal-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Modal header */
+.admin-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    padding-top: 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+}
+
+.admin-modal-header:active {
+    cursor: grabbing;
+}
+
+.admin-modal-header h3 {
+    font-family: var(--font-family);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.admin-modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity var(--transition-fast);
+}
+
+.admin-modal-close:active {
+    opacity: 0.5;
+}
+
+.admin-modal-close svg {
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-muted);
+}
+
+/* Modal body */
+.admin-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0 20px 20px;
+    max-height: calc(85vh - 80px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Status badge */
+.admin-modal-status {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0;
+}
+
+.admin-detail-badge {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+.admin-detail-badge.badge-pending {
+    background-color: rgba(212, 175, 55, 0.15);
+    color: var(--color-accent);
+}
+
+.admin-detail-badge.badge-confirmed {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: #4CAF50;
+}
+
+.admin-detail-badge.badge-rejected {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
+}
+
+.admin-detail-badge.badge-cancelled {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
+}
+
+/* Detail rows */
+.admin-detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-detail-row:last-of-type {
+    border-bottom: none;
+}
+
+.admin-detail-label {
+    font-family: var(--font-family);
+    font-size: 13px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.admin-detail-value {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    text-align: right;
+    margin-left: 12px;
+    word-break: break-all;
+}
+
+.admin-detail-value.accent {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.admin-detail-value.mono {
+    font-family: 'SF Mono', 'Monaco', monospace;
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.admin-detail-separator {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
 }
