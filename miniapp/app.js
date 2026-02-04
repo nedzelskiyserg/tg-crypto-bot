@@ -1040,17 +1040,14 @@ async function loadAdminPage() {
         adminStylesLoaded = true;
     }
 
-    // Load HTML if not loaded
-    if (!adminPageLoaded) {
-        try {
-            const response = await fetch('pages/admin.html');
-            const html = await response.text();
-            container.innerHTML = html;
-            adminPageLoaded = true;
-        } catch (error) {
-            console.error('Failed to load admin page:', error);
-            return;
-        }
+    // Always fetch latest HTML so updates (e.g. filters page) are visible
+    try {
+        const response = await fetch('pages/admin.html', { cache: 'no-store' });
+        const html = await response.text();
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Failed to load admin page:', error);
+        return;
     }
 
     // Load JS if not loaded
