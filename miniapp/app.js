@@ -245,17 +245,7 @@ function showPage(pageName) {
     if (tg) {
         if (pageName !== 'home') {
             tg.BackButton.show();
-            if (pageName === 'admin') {
-                tg.BackButton.onClick(() => {
-                    if (window.adminFiltersVisible && typeof window.closeAdminFiltersPage === 'function') {
-                        window.closeAdminFiltersPage();
-                    } else {
-                        showPage('home');
-                    }
-                });
-            } else {
-                tg.BackButton.onClick(() => showPage('home'));
-            }
+            tg.BackButton.onClick(() => showPage('home'));
         } else {
             tg.BackButton.hide();
         }
@@ -1027,49 +1017,37 @@ let adminPageLoaded = false;
 let adminStylesLoaded = false;
 let adminScriptLoaded = false;
 
-function getAdminPageBaseUrl() {
-    const path = window.location.pathname || '/';
-    const dir = path.endsWith('/') ? path.slice(0, -1) : path.replace(/\/[^/]*$/, '');
-    const base = (dir ? dir + '/' : '/');
-    return window.location.origin + base;
-}
-
 async function loadAdminPage() {
     const container = document.getElementById('pageAdminContainer');
     if (!container) return;
 
-    const baseUrl = getAdminPageBaseUrl();
-    if (!baseUrl) return;
-
-    // Load CSS if not loaded (cache-bust for updates)
+    // Load CSS if not loaded
     if (!adminStylesLoaded) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = baseUrl + 'pages/css/admin.css?v=2';
+        link.href = 'pages/css/admin.css';
         document.head.appendChild(link);
         adminStylesLoaded = true;
     }
 
-    // Always fetch latest HTML; use absolute URL + cache-bust so updates are visible
-    const adminHtmlUrl = baseUrl + 'pages/admin.html?t=' + Date.now();
-    try {
-        const response = await fetch(adminHtmlUrl, { cache: 'no-store' });
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        const html = await response.text();
-        if (!html || html.indexOf('admin-filters-open-btn') === -1) {
-            console.warn('Admin HTML may be outdated (missing admin-filters-open-btn)');
+    // Load HTML if not loaded
+    if (!adminPageLoaded) {
+        try {
+            const response = await fetch('pages/admin.html');
+            const html = await response.text();
+            container.innerHTML = html;
+            adminPageLoaded = true;
+        } catch (error) {
+            console.error('Failed to load admin page:', error);
+            return;
         }
-        container.innerHTML = html;
-    } catch (error) {
-        console.error('Failed to load admin page:', error);
-        return;
     }
 
-    // Load JS if not loaded (use baseUrl + version so updates are picked up)
+    // Load JS if not loaded
     if (!adminScriptLoaded) {
         return new Promise((resolve) => {
             const script = document.createElement('script');
-            script.src = baseUrl + 'pages/js/admin.js?v=2';
+            script.src = 'pages/js/admin.js';
             script.onload = () => {
                 adminScriptLoaded = true;
                 if (window.initAdminPage) {

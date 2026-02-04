@@ -374,145 +374,6 @@ function escapeAttr(s) {
 }
 
 // ============================================
-// FILTERS PAGE (separate screen)
-// ============================================
-
-function openAdminFiltersPage() {
-    window.adminFiltersVisible = true;
-    window.closeAdminFiltersPage = closeAdminFiltersPage;
-
-    var page = document.getElementById('adminFiltersPage');
-    var tabs = document.getElementById('adminTabOrders');
-    if (page) page.classList.add('active');
-    if (page) page.setAttribute('aria-hidden', 'false');
-    if (tabs) tabs.classList.add('filters-overlay-hidden');
-
-    syncFiltersFormFromState();
-    if (window.hapticFeedback) window.hapticFeedback('light');
-}
-
-function closeAdminFiltersPage() {
-    window.adminFiltersVisible = false;
-    window.closeAdminFiltersPage = null;
-
-    var page = document.getElementById('adminFiltersPage');
-    var tabs = document.getElementById('adminTabOrders');
-    if (page) page.classList.remove('active');
-    if (page) page.setAttribute('aria-hidden', 'true');
-    if (tabs) tabs.classList.remove('filters-overlay-hidden');
-
-    renderActiveFilters();
-    if (window.hapticFeedback) window.hapticFeedback('light');
-}
-
-function syncFiltersFormFromState() {
-    var st = window.adminState.filters;
-    setElValue('adminFilterStatus', st.status);
-    setElValue('adminFilterOrderId', st.orderId);
-    setElValue('adminFilterAmountMin', st.amountMin);
-    setElValue('adminFilterAmountMax', st.amountMax);
-    setElValue('adminFilterDateFrom', st.dateFrom);
-    setElValue('adminFilterDateTo', st.dateTo);
-}
-
-function setElValue(id, val) {
-    var el = document.getElementById(id);
-    if (el) el.value = val || '';
-}
-
-function readFiltersFormIntoState() {
-    var st = window.adminState.filters;
-    st.status = document.getElementById('adminFilterStatus')?.value || '';
-    st.orderId = document.getElementById('adminFilterOrderId')?.value || '';
-    st.amountMin = document.getElementById('adminFilterAmountMin')?.value || '';
-    st.amountMax = document.getElementById('adminFilterAmountMax')?.value || '';
-    st.dateFrom = document.getElementById('adminFilterDateFrom')?.value || '';
-    st.dateTo = document.getElementById('adminFilterDateTo')?.value || '';
-}
-
-function applyFromFiltersPage() {
-    readFiltersFormIntoState();
-    window.adminState.ordersPage = 1;
-    closeAdminFiltersPage();
-    loadAdminOrders();
-    if (window.showToast) window.showToast('Фильтры применены', 'success');
-    if (window.hapticFeedback) window.hapticFeedback('success');
-}
-
-function resetFromFiltersPage() {
-    window.adminState.filters = { status: '', orderId: '', amountMin: '', amountMax: '', dateFrom: '', dateTo: '' };
-    window.adminState.ordersPage = 1;
-    syncFiltersFormFromState();
-    closeAdminFiltersPage();
-    loadAdminOrders();
-    if (window.showToast) window.showToast('Фильтры сброшены', 'success');
-    if (window.hapticFeedback) window.hapticFeedback('light');
-}
-
-function hasAnyFilter() {
-    var f = window.adminState.filters;
-    return !!(f.status || f.orderId || f.amountMin || f.amountMax || f.dateFrom || f.dateTo);
-}
-
-var adminFilterChipLabels = {
-    status: 'Статус',
-    orderId: 'ID заявки',
-    amountMin: 'Сумма от',
-    amountMax: 'Сумма до',
-    dateFrom: 'Дата от',
-    dateTo: 'Дата до'
-};
-
-var adminFilterDisplayValue = {
-    status: function (v) { return adminStatusLabels[v] || v; },
-    orderId: function (v) { return '#' + v; },
-    amountMin: function (v) { return v + ' ₽'; },
-    amountMax: function (v) { return v + ' ₽'; },
-    dateFrom: function (v) { return v; },
-    dateTo: function (v) { return v; }
-};
-
-function renderActiveFilters() {
-    var bar = document.getElementById('adminActiveFiltersBar');
-    var chipsWrap = document.getElementById('adminActiveFiltersChips');
-    if (!bar || !chipsWrap) return;
-
-    if (!hasAnyFilter()) {
-        bar.style.display = 'none';
-        return;
-    }
-
-    bar.style.display = '';
-    chipsWrap.innerHTML = '';
-
-    var f = window.adminState.filters;
-    var keys = ['status', 'orderId', 'amountMin', 'amountMax', 'dateFrom', 'dateTo'];
-    keys.forEach(function (key) {
-        var val = f[key];
-        if (!val) return;
-        var label = adminFilterChipLabels[key] || key;
-        var displayVal = (adminFilterDisplayValue[key] || function (v) { return v; })(val);
-        var chip = document.createElement('div');
-        chip.className = 'admin-filter-chip';
-        chip.dataset.filterKey = key;
-        chip.innerHTML = '<span class="admin-filter-chip-text">' + escapeHtmlAdmin(label + ': ' + displayVal) + '</span><button type="button" class="admin-filter-chip-remove" data-filter-key="' + escapeAttr(key) + '" aria-label="Убрать фильтр">×</button>';
-        chipsWrap.appendChild(chip);
-    });
-}
-
-function removeOneFilter(key) {
-    if (!window.adminState.filters[key]) return;
-    window.adminState.filters[key] = '';
-    var id = 'adminFilter' + key.charAt(0).toUpperCase() + key.slice(1);
-    var el = document.getElementById(id);
-    if (el) el.value = '';
-    window.adminState.ordersPage = 1;
-    loadAdminOrders();
-    renderActiveFilters();
-    if (window.hapticFeedback) window.hapticFeedback('light');
-}
-
-// ============================================
 // TAB SWITCHING
 // ============================================
 
@@ -535,7 +396,6 @@ function switchAdminTab(tabName) {
         loadRateSettings();
     } else if (tabName === 'orders') {
         loadAdminOrders();
-        renderActiveFilters();
     }
 
     if (window.hapticFeedback) window.hapticFeedback('light');
@@ -568,44 +428,19 @@ function adminGlobalClickHandler(e) {
         return;
     }
 
-    // Open filters page (from orders tab)
-    if (e.target.closest('#adminOpenFiltersBtn') || e.target.closest('#adminChangeFiltersBtn')) {
+    // Apply filters
+    if (e.target.closest('#adminApplyFilters')) {
         e.preventDefault();
         e.stopPropagation();
-        openAdminFiltersPage();
+        applyOrderFilters();
         return;
     }
 
-    // Clear all filters (from active filters bar)
-    if (e.target.closest('#adminClearAllFiltersBtn')) {
+    // Reset filters
+    if (e.target.closest('#adminResetFilters')) {
         e.preventDefault();
         e.stopPropagation();
         resetOrderFilters();
-        return;
-    }
-
-    // Apply filters (on filters page)
-    if (e.target.closest('#adminFiltersApplyBtn')) {
-        e.preventDefault();
-        e.stopPropagation();
-        applyFromFiltersPage();
-        return;
-    }
-
-    // Reset filters (on filters page)
-    if (e.target.closest('#adminFiltersResetBtn')) {
-        e.preventDefault();
-        e.stopPropagation();
-        resetFromFiltersPage();
-        return;
-    }
-
-    // Remove one filter chip
-    var chipRemove = e.target.closest('.admin-filter-chip-remove');
-    if (chipRemove && chipRemove.dataset.filterKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        removeOneFilter(chipRemove.dataset.filterKey);
         return;
     }
 
@@ -649,11 +484,14 @@ function resetOrderFilters() {
     const st = window.adminState;
     st.filters = { status: '', orderId: '', amountMin: '', amountMax: '', dateFrom: '', dateTo: '' };
     st.ordersPage = 1;
-    syncFiltersFormFromState();
+
+    const fields = ['adminFilterStatus', 'adminFilterOrderId', 'adminFilterAmountMin', 'adminFilterAmountMax', 'adminFilterDateFrom', 'adminFilterDateTo'];
+    fields.forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
 
     loadAdminOrders();
-    renderActiveFilters();
-    if (window.showToast) window.showToast('Фильтры сброшены', 'success');
     if (window.hapticFeedback) window.hapticFeedback('light');
 }
 

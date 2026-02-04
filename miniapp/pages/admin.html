@@ -86,24 +86,60 @@
         <!-- Tab: Orders -->
         <div class="admin-tab-content" id="adminTabOrders" data-tab="orders">
             <section class="admin-section">
-                <div class="admin-section-header admin-orders-header">
-                    <div class="admin-orders-title-row">
-                        <div class="accent-bar"></div>
-                        <span class="section-title">ВСЕ ЗАЯВКИ</span>
-                        <span class="admin-orders-total" id="adminOrdersTotal"></span>
-                    </div>
-                    <button type="button" class="admin-filters-open-btn" id="adminOpenFiltersBtn" aria-label="Открыть фильтры">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/><circle cx="11" cy="12" r="2"/></svg>
-                        <span>ФИЛЬТРЫ</span>
-                    </button>
+                <div class="admin-section-header">
+                    <div class="accent-bar"></div>
+                    <span class="section-title">ВСЕ ЗАЯВКИ</span>
+                    <span class="admin-orders-total" id="adminOrdersTotal"></span>
                 </div>
 
-                <!-- Active filters bar (chips + change/reset) -->
-                <div class="admin-active-filters" id="adminActiveFiltersBar" style="display: none;">
-                    <div class="admin-active-filters-chips" id="adminActiveFiltersChips"></div>
-                    <div class="admin-active-filters-actions">
-                        <button type="button" class="admin-active-filters-btn admin-active-filters-change" id="adminChangeFiltersBtn">Изменить</button>
-                        <button type="button" class="admin-active-filters-btn admin-active-filters-clear" id="adminClearAllFiltersBtn">Сбросить всё</button>
+                <!-- Orders Filters -->
+                <div class="admin-orders-filters">
+                    <!-- Status Filter -->
+                    <div class="admin-filter-row">
+                        <label class="admin-filter-label">Статус</label>
+                        <select id="adminFilterStatus" class="admin-select">
+                            <option value="">Все</option>
+                            <option value="pending">В обработке</option>
+                            <option value="confirmed">Подтверждено</option>
+                            <option value="rejected">Отклонено</option>
+                            <option value="cancelled">Отменено</option>
+                        </select>
+                    </div>
+                    <!-- Order ID -->
+                    <div class="admin-filter-row">
+                        <label class="admin-filter-label">ID заявки</label>
+                        <input type="number" id="adminFilterOrderId" class="admin-input admin-input-sm" placeholder="Номер" />
+                    </div>
+                    <!-- Amount Range -->
+                    <div class="admin-filter-row admin-filter-row-double">
+                        <div class="admin-filter-half">
+                            <label class="admin-filter-label">Сумма от</label>
+                            <input type="number" id="adminFilterAmountMin" class="admin-input admin-input-sm" placeholder="Мин" />
+                        </div>
+                        <div class="admin-filter-half">
+                            <label class="admin-filter-label">Сумма до</label>
+                            <input type="number" id="adminFilterAmountMax" class="admin-input admin-input-sm" placeholder="Макс" />
+                        </div>
+                    </div>
+                    <!-- Date Range -->
+                    <div class="admin-filter-row admin-filter-row-double">
+                        <div class="admin-filter-half">
+                            <label class="admin-filter-label">Дата от</label>
+                            <input type="date" id="adminFilterDateFrom" class="admin-input admin-input-sm" />
+                        </div>
+                        <div class="admin-filter-half">
+                            <label class="admin-filter-label">Дата до</label>
+                            <input type="date" id="adminFilterDateTo" class="admin-input admin-input-sm" />
+                        </div>
+                    </div>
+                    <!-- Filter Actions -->
+                    <div class="admin-filter-actions">
+                        <button class="admin-filter-btn" id="adminApplyFilters">
+                            <span>ПРИМЕНИТЬ</span>
+                        </button>
+                        <button class="admin-filter-btn admin-filter-btn-reset" id="adminResetFilters">
+                            <span>СБРОСИТЬ</span>
+                        </button>
                     </div>
                 </div>
 
@@ -127,73 +163,6 @@
                     <span class="empty-desc">По выбранным фильтрам заявки не найдены</span>
                 </div>
             </section>
-        </div>
-
-        <!-- Filters page (full-screen, mobile-first) -->
-        <div class="admin-filters-page" id="adminFiltersPage" aria-hidden="true">
-            <div class="admin-filters-page-inner">
-                <header class="admin-filters-header">
-                    <h2 class="admin-filters-title">Фильтры заявок</h2>
-                    <p class="admin-filters-desc">Настройте условия отбора заявок</p>
-                </header>
-
-                <form class="admin-filters-form" id="adminFiltersForm" novalidate>
-                    <section class="admin-filters-group">
-                        <h3 class="admin-filters-group-title">Статус и ID</h3>
-                        <div class="admin-filters-field">
-                            <label class="admin-filters-label" for="adminFilterStatus">Статус</label>
-                            <select id="adminFilterStatus" class="admin-filters-select">
-                                <option value="">Все статусы</option>
-                                <option value="pending">В обработке</option>
-                                <option value="confirmed">Подтверждено</option>
-                                <option value="rejected">Отклонено</option>
-                                <option value="cancelled">Отменено</option>
-                            </select>
-                        </div>
-                        <div class="admin-filters-field">
-                            <label class="admin-filters-label" for="adminFilterOrderId">ID заявки</label>
-                            <input type="number" id="adminFilterOrderId" class="admin-filters-input" placeholder="Например: 42" min="1" inputmode="numeric" />
-                        </div>
-                    </section>
-
-                    <section class="admin-filters-group">
-                        <h3 class="admin-filters-group-title">Сумма (RUB)</h3>
-                        <div class="admin-filters-row">
-                            <div class="admin-filters-field admin-filters-field-half">
-                                <label class="admin-filters-label" for="adminFilterAmountMin">От</label>
-                                <input type="number" id="adminFilterAmountMin" class="admin-filters-input" placeholder="Мин" min="0" inputmode="numeric" />
-                            </div>
-                            <div class="admin-filters-field admin-filters-field-half">
-                                <label class="admin-filters-label" for="adminFilterAmountMax">До</label>
-                                <input type="number" id="adminFilterAmountMax" class="admin-filters-input" placeholder="Макс" min="0" inputmode="numeric" />
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="admin-filters-group">
-                        <h3 class="admin-filters-group-title">Период</h3>
-                        <div class="admin-filters-row">
-                            <div class="admin-filters-field admin-filters-field-half">
-                                <label class="admin-filters-label" for="adminFilterDateFrom">Дата от</label>
-                                <input type="date" id="adminFilterDateFrom" class="admin-filters-input admin-filters-input-date" />
-                            </div>
-                            <div class="admin-filters-field admin-filters-field-half">
-                                <label class="admin-filters-label" for="adminFilterDateTo">Дата до</label>
-                                <input type="date" id="adminFilterDateTo" class="admin-filters-input admin-filters-input-date" />
-                            </div>
-                        </div>
-                    </section>
-                </form>
-
-                <div class="admin-filters-page-actions">
-                    <button type="button" class="admin-filters-apply-btn" id="adminFiltersApplyBtn">
-                        <span>Применить</span>
-                    </button>
-                    <button type="button" class="admin-filters-reset-btn" id="adminFiltersResetBtn">
-                        <span>Сбросить</span>
-                    </button>
-                </div>
-            </div>
         </div>
     </main>
 </div>
