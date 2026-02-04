@@ -31,14 +31,24 @@ window.adminState = {
     ordersPageSize: 20,
     ordersTotalPages: 1,
     ordersTotal: 0,
+    filtersOpen: false,
+    selectedPeriod: 'all',
     filters: {
         status: '',
-        orderId: '',
         amountMin: '',
         amountMax: '',
         dateFrom: '',
         dateTo: ''
-    }
+    },
+    // Draft filters (edited on filters page, applied on "ПОКАЗАТЬ")
+    draftFilters: {
+        status: '',
+        amountMin: '',
+        amountMax: '',
+        dateFrom: '',
+        dateTo: ''
+    },
+    draftPeriod: 'all'
 };
 
 function getApiBaseUrl() {
@@ -226,6 +236,290 @@ const adminStatusLabels = {
     cancelled: 'ОТМЕНЕНО'
 };
 
+const adminStatusLabelsShort = {
+    pending: 'В обработке',
+    confirmed: 'Подтверждено',
+    rejected: 'Отклонено',
+    cancelled: 'Отменено'
+};
+
+const adminPeriodLabels = {
+    all: 'Все время',
+    today: 'Сегодня',
+    week: 'Неделя',
+    month: 'Месяц'
+};
+
+// ============================================
+// FILTERS PAGE NAVIGATION
+// ============================================
+
+function openFiltersPage() {
+    var st = window.adminState;
+    var filtersView = document.getElementById('adminFiltersView');
+    var listView = document.getElementById('adminOrdersListView');
+
+    if (!filtersView || !listView) return;
+
+    // Copy current filters to draft
+    st.draftFilters = JSON.parse(JSON.stringify(st.filters));
+    st.draftPeriod = st.selectedPeriod;
+
+    // Sync draft to UI
+    syncDraftFiltersToUI();
+
+    listView.classList.add('hidden');
+    filtersView.classList.add('visible');
+    st.filtersOpen = true;
+
+    if (window.hapticFeedback) window.hapticFeedback('light');
+}
+
+function closeFiltersPage() {
+    var filtersView = document.getElementById('adminFiltersView');
+    var listView = document.getElementById('adminOrdersListView');
+
+    if (!filtersView || !listView) return;
+
+    filtersView.classList.remove('visible');
+    listView.classList.remove('hidden');
+    window.adminState.filtersOpen = false;
+}
+
+function syncDraftFiltersToUI() {
+    var st = window.adminState;
+
+    // Status chips
+    document.querySelectorAll('#adminStatusChips .admin-status-chip').forEach(function (chip) {
+        chip.classList.toggle('selected', chip.dataset.status === st.draftFilters.status);
+    });
+
+    // Period presets
+    document.querySelectorAll('#adminPeriodPresets .admin-period-btn').forEach(function (btn) {
+        btn.classList.toggle('active', btn.dataset.period === st.draftPeriod);
+    });
+
+    // Custom date visibility
+    var customEl = document.getElementById('adminPeriodCustom');
+    if (customEl) {
+        var isCustom = st.draftPeriod === 'all' || !st.draftPeriod;
+        // Show custom dates only when period is "all" and dates are set, or always show for manual entry
+        customEl.classList.toggle('visible', isCustom && (st.draftFilters.dateFrom || st.draftFilters.dateTo));
+    }
+
+    // Date inputs
+    var dateFromEl = document.getElementById('adminFilterDateFrom');
+    var dateToEl = document.getElementById('adminFilterDateTo');
+    if (dateFromEl) dateFromEl.value = st.draftFilters.dateFrom || '';
+    if (dateToEl) dateToEl.value = st.draftFilters.dateTo || '';
+
+    // Amount inputs
+    var amountMinEl = document.getElementById('adminFilterAmountMin');
+    var amountMaxEl = document.getElementById('adminFilterAmountMax');
+    if (amountMinEl) amountMinEl.value = st.draftFilters.amountMin || '';
+    if (amountMaxEl) amountMaxEl.value = st.draftFilters.amountMax || '';
+}
+
+// ============================================
+// PERIOD PRESETS
+// ============================================
+
+function getPeriodDates(period) {
+    var now = new Date();
+    var dateFrom = '';
+    var dateTo = '';
+
+    if (period === 'today') {
+        dateFrom = formatDateISO(now);
+        dateTo = formatDateISO(now);
+    } else if (period === 'week') {
+        var weekAgo = new Date(now);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        dateFrom = formatDateISO(weekAgo);
+        dateTo = formatDateISO(now);
+    } else if (period === 'month') {
+        var monthAgo = new Date(now);
+        monthAgo.setMonth(monthAgo.getMonth() - 1);
+        dateFrom = formatDateISO(monthAgo);
+        dateTo = formatDateISO(now);
+    }
+
+    return { dateFrom: dateFrom, dateTo: dateTo };
+}
+
+function formatDateISO(d) {
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+}
+
+function selectPeriod(period) {
+    var st = window.adminState;
+    st.draftPeriod = period;
+
+    // Update UI
+    document.querySelectorAll('#adminPeriodPresets .admin-period-btn').forEach(function (btn) {
+        btn.classList.toggle('active', btn.dataset.period === period);
+    });
+
+    var customEl = document.getElementById('adminPeriodCustom');
+    if (period !== 'all') {
+        // Set dates from preset
+        var dates = getPeriodDates(period);
+        st.draftFilters.dateFrom = dates.dateFrom;
+        st.draftFilters.dateTo = dates.dateTo;
+        if (customEl) customEl.classList.remove('visible');
+    } else {
+        // Clear dates for "all"
+        st.draftFilters.dateFrom = '';
+        st.draftFilters.dateTo = '';
+        if (customEl) customEl.classList.remove('visible');
+        var dateFromEl = document.getElementById('adminFilterDateFrom');
+        var dateToEl = document.getElementById('adminFilterDateTo');
+        if (dateFromEl) dateFromEl.value = '';
+        if (dateToEl) dateToEl.value = '';
+    }
+
+    if (window.hapticFeedback) window.hapticFeedback('light');
+}
+
+function toggleCustomDates() {
+    var st = window.adminState;
+    var customEl = document.getElementById('adminPeriodCustom');
+    if (!customEl) return;
+
+    // Deselect all period presets
+    st.draftPeriod = 'all';
+    document.querySelectorAll('#adminPeriodPresets .admin-period-btn').forEach(function (btn) {
+        btn.classList.remove('active');
+    });
+
+    customEl.classList.add('visible');
+}
+
+// ============================================
+// ACTIVE FILTER CHIPS
+// ============================================
+
+function getActiveFilterCount() {
+    var st = window.adminState;
+    var count = 0;
+    if (st.filters.status) count++;
+    if (st.filters.amountMin || st.filters.amountMax) count++;
+    if (st.filters.dateFrom || st.filters.dateTo) count++;
+    return count;
+}
+
+function renderActiveFilterChips() {
+    var st = window.adminState;
+    var container = document.getElementById('adminActiveFilters');
+    var countEl = document.getElementById('adminFilterCount');
+    var toggleBtn = document.getElementById('adminOpenFilters');
+
+    if (!container) return;
+    container.innerHTML = '';
+
+    var chips = [];
+
+    // Status chip
+    if (st.filters.status) {
+        chips.push({
+            key: 'status',
+            text: adminStatusLabelsShort[st.filters.status] || st.filters.status
+        });
+    }
+
+    // Period chip
+    if (st.filters.dateFrom || st.filters.dateTo) {
+        var periodText = '';
+        if (st.selectedPeriod && st.selectedPeriod !== 'all') {
+            periodText = adminPeriodLabels[st.selectedPeriod];
+        } else {
+            var from = st.filters.dateFrom ? formatDateRu(st.filters.dateFrom) : '';
+            var to = st.filters.dateTo ? formatDateRu(st.filters.dateTo) : '';
+            if (from && to) periodText = from + ' – ' + to;
+            else if (from) periodText = 'от ' + from;
+            else if (to) periodText = 'до ' + to;
+        }
+        chips.push({ key: 'period', text: periodText });
+    }
+
+    // Amount chip
+    if (st.filters.amountMin || st.filters.amountMax) {
+        var amtText = '';
+        if (st.filters.amountMin && st.filters.amountMax) {
+            amtText = formatAdminAmount(st.filters.amountMin) + ' – ' + formatAdminAmount(st.filters.amountMax) + ' ₽';
+        } else if (st.filters.amountMin) {
+            amtText = 'от ' + formatAdminAmount(st.filters.amountMin) + ' ₽';
+        } else {
+            amtText = 'до ' + formatAdminAmount(st.filters.amountMax) + ' ₽';
+        }
+        chips.push({ key: 'amount', text: amtText });
+    }
+
+    var count = chips.length;
+
+    // Update filter button state
+    if (toggleBtn) toggleBtn.classList.toggle('has-filters', count > 0);
+    if (countEl) {
+        if (count > 0) {
+            countEl.textContent = count;
+            countEl.style.display = '';
+        } else {
+            countEl.style.display = 'none';
+        }
+    }
+
+    // Show/hide chips container
+    if (count === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'flex';
+
+    chips.forEach(function (chip) {
+        var el = document.createElement('button');
+        el.className = 'admin-filter-chip';
+        el.dataset.filterKey = chip.key;
+        el.innerHTML =
+            '<span class="admin-filter-chip-text">' + escapeHtmlAdmin(chip.text) + '</span>' +
+            '<span class="admin-filter-chip-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></span>';
+        container.appendChild(el);
+    });
+}
+
+function formatDateRu(dateStr) {
+    if (!dateStr) return '';
+    var parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    return parts[2] + '.' + parts[1];
+}
+
+function removeFilterChip(key) {
+    var st = window.adminState;
+
+    if (key === 'status') {
+        st.filters.status = '';
+    } else if (key === 'period') {
+        st.filters.dateFrom = '';
+        st.filters.dateTo = '';
+        st.selectedPeriod = 'all';
+    } else if (key === 'amount') {
+        st.filters.amountMin = '';
+        st.filters.amountMax = '';
+    }
+
+    st.ordersPage = 1;
+    loadAdminOrders();
+    if (window.hapticFeedback) window.hapticFeedback('light');
+}
+
+// ============================================
+// LOAD & RENDER ORDERS
+// ============================================
+
 async function loadAdminOrders() {
     const baseUrl = getApiBaseUrl();
     const telegramId = getTelegramId();
@@ -248,7 +542,6 @@ async function loadAdminOrders() {
     params.set('page_size', st.ordersPageSize);
 
     if (st.filters.status) params.set('status', st.filters.status);
-    if (st.filters.orderId) params.set('order_id', st.filters.orderId);
     if (st.filters.amountMin) params.set('amount_min', st.filters.amountMin);
     if (st.filters.amountMax) params.set('amount_max', st.filters.amountMax);
     if (st.filters.dateFrom) params.set('date_from', st.filters.dateFrom);
@@ -278,6 +571,7 @@ async function loadAdminOrders() {
         st.ordersTotalPages = data.total_pages;
 
         renderAdminOrders();
+        renderActiveFilterChips();
     } catch (e) {
         adminError('Error loading orders', e);
         if (listEl) listEl.innerHTML = '<div class="admin-loading" style="color:#c00;">Ошибка сети</div>';
@@ -428,6 +722,22 @@ function adminGlobalClickHandler(e) {
         return;
     }
 
+    // Open filters page
+    if (e.target.closest('#adminOpenFilters')) {
+        e.preventDefault();
+        e.stopPropagation();
+        openFiltersPage();
+        return;
+    }
+
+    // Back from filters
+    if (e.target.closest('#adminFiltersBack')) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeFiltersPage();
+        return;
+    }
+
     // Apply filters
     if (e.target.closest('#adminApplyFilters')) {
         e.preventDefault();
@@ -441,6 +751,33 @@ function adminGlobalClickHandler(e) {
         e.preventDefault();
         e.stopPropagation();
         resetOrderFilters();
+        return;
+    }
+
+    // Status chip toggle
+    var statusChip = e.target.closest('.admin-status-chip');
+    if (statusChip && statusChip.dataset.status) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleStatusChip(statusChip.dataset.status);
+        return;
+    }
+
+    // Period preset
+    var periodBtn = e.target.closest('.admin-period-btn');
+    if (periodBtn && periodBtn.dataset.period) {
+        e.preventDefault();
+        e.stopPropagation();
+        selectPeriod(periodBtn.dataset.period);
+        return;
+    }
+
+    // Filter chip removal
+    var filterChip = e.target.closest('.admin-filter-chip');
+    if (filterChip && filterChip.dataset.filterKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        removeFilterChip(filterChip.dataset.filterKey);
         return;
     }
 
@@ -467,31 +804,57 @@ function adminGlobalClickHandler(e) {
     }
 }
 
-function applyOrderFilters() {
-    const st = window.adminState;
-    st.filters.status = document.getElementById('adminFilterStatus')?.value || '';
-    st.filters.orderId = document.getElementById('adminFilterOrderId')?.value || '';
-    st.filters.amountMin = document.getElementById('adminFilterAmountMin')?.value || '';
-    st.filters.amountMax = document.getElementById('adminFilterAmountMax')?.value || '';
-    st.filters.dateFrom = document.getElementById('adminFilterDateFrom')?.value || '';
-    st.filters.dateTo = document.getElementById('adminFilterDateTo')?.value || '';
-    st.ordersPage = 1;
-    loadAdminOrders();
+function toggleStatusChip(status) {
+    var st = window.adminState;
+
+    // Toggle: if already selected, deselect
+    if (st.draftFilters.status === status) {
+        st.draftFilters.status = '';
+    } else {
+        st.draftFilters.status = status;
+    }
+
+    // Update UI
+    document.querySelectorAll('#adminStatusChips .admin-status-chip').forEach(function (chip) {
+        chip.classList.toggle('selected', chip.dataset.status === st.draftFilters.status);
+    });
+
     if (window.hapticFeedback) window.hapticFeedback('light');
 }
 
-function resetOrderFilters() {
-    const st = window.adminState;
-    st.filters = { status: '', orderId: '', amountMin: '', amountMax: '', dateFrom: '', dateTo: '' };
+function applyOrderFilters() {
+    var st = window.adminState;
+
+    // Read current draft input values
+    st.draftFilters.amountMin = document.getElementById('adminFilterAmountMin')?.value || '';
+    st.draftFilters.amountMax = document.getElementById('adminFilterAmountMax')?.value || '';
+
+    // If custom dates were entered manually (period = all), read them
+    if (st.draftPeriod === 'all' || !st.draftPeriod) {
+        var dateFromEl = document.getElementById('adminFilterDateFrom');
+        var dateToEl = document.getElementById('adminFilterDateTo');
+        st.draftFilters.dateFrom = dateFromEl?.value || '';
+        st.draftFilters.dateTo = dateToEl?.value || '';
+    }
+
+    // Apply draft to active filters
+    st.filters = JSON.parse(JSON.stringify(st.draftFilters));
+    st.selectedPeriod = st.draftPeriod;
     st.ordersPage = 1;
 
-    const fields = ['adminFilterStatus', 'adminFilterOrderId', 'adminFilterAmountMin', 'adminFilterAmountMax', 'adminFilterDateFrom', 'adminFilterDateTo'];
-    fields.forEach(function (id) {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
-
+    // Close filters page and load
+    closeFiltersPage();
     loadAdminOrders();
+    if (window.hapticFeedback) window.hapticFeedback('success');
+}
+
+function resetOrderFilters() {
+    var st = window.adminState;
+    st.draftFilters = { status: '', amountMin: '', amountMax: '', dateFrom: '', dateTo: '' };
+    st.draftPeriod = 'all';
+
+    // Reset UI
+    syncDraftFiltersToUI();
     if (window.hapticFeedback) window.hapticFeedback('light');
 }
 

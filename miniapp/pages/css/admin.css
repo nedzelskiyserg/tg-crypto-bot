@@ -252,95 +252,471 @@
 }
 
 /* ========================================
-   ORDERS FILTERS
+   ORDERS VIEWS
    ======================================== */
-.admin-orders-filters {
+.admin-orders-view {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.admin-orders-view:first-child {
+    display: flex;
+}
+
+#adminTabOrders.active .admin-orders-view:first-child {
+    display: flex;
+}
+
+#adminTabOrders.active .admin-filters-page {
+    display: none;
+}
+
+#adminTabOrders.active .admin-filters-page.visible {
+    display: flex;
+    animation: filterSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+#adminTabOrders.active .admin-orders-view:first-child.hidden {
+    display: none;
+}
+
+@keyframes filterSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes filterSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+}
+
+/* ========================================
+   ORDERS HEADER
+   ======================================== */
+.admin-orders-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.admin-orders-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Filter Toggle Button */
+.admin-filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
     background-color: var(--color-bg-card);
-    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+}
+
+.admin-filter-toggle:active {
+    transform: scale(0.97);
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.admin-filter-toggle svg {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: color var(--transition-fast);
+}
+
+.admin-filter-toggle span {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.3px;
+}
+
+.admin-filter-toggle.has-filters {
+    border-color: rgba(212, 175, 55, 0.3);
+    background-color: rgba(212, 175, 55, 0.06);
+}
+
+.admin-filter-toggle.has-filters svg {
+    color: var(--color-accent);
+}
+
+.admin-filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background-color: var(--color-accent);
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-bg);
+    line-height: 1;
+}
+
+/* ========================================
+   ACTIVE FILTER CHIPS
+   ======================================== */
+.admin-active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 2px;
+}
+
+.admin-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background-color: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    max-width: 100%;
+}
+
+.admin-filter-chip:active {
+    transform: scale(0.95);
+}
+
+.admin-filter-chip-text {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-filter-chip-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.admin-filter-chip-close svg {
+    width: 10px;
+    height: 10px;
+    color: var(--color-accent);
+    opacity: 0.6;
+}
+
+/* ========================================
+   FILTERS PAGE
+   ======================================== */
+.admin-filters-page .admin-section {
+    gap: 24px;
+}
+
+/* Filters Header */
+.admin-filters-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 4px;
+}
+
+.admin-filters-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    margin-left: -8px;
+}
+
+.admin-filters-back:active {
+    opacity: 0.6;
+}
+
+.admin-filters-back svg {
+    color: var(--color-text-primary);
+}
+
+.admin-filters-title {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--color-text-primary);
+    flex: 1;
+}
+
+.admin-filters-reset-link {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    padding: 8px 4px;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--transition-fast);
+}
+
+.admin-filters-reset-link:active {
+    color: var(--color-accent);
+}
+
+/* Filter Groups */
+.admin-filter-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
-.admin-filter-row {
+.admin-filter-group-label {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+/* Status Chips */
+.admin-status-chips {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.admin-filter-row-double {
-    flex-direction: row;
+.admin-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background-color: var(--color-bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.admin-status-chip:active {
+    transform: scale(0.97);
+}
+
+.admin-status-chip.selected {
+    background-color: rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.4);
+    color: var(--color-accent);
+}
+
+.admin-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.admin-status-dot.dot-pending {
+    background-color: var(--color-accent);
+}
+
+.admin-status-dot.dot-confirmed {
+    background-color: #4CAF50;
+}
+
+.admin-status-dot.dot-rejected {
+    background-color: #EF5350;
+}
+
+.admin-status-dot.dot-cancelled {
+    background-color: #6b7280;
+}
+
+/* Period Presets */
+.admin-period-presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.admin-period-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+    background-color: var(--color-bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.admin-period-btn:active {
+    transform: scale(0.97);
+}
+
+.admin-period-btn.active {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-bg);
+    font-weight: 600;
+}
+
+/* Custom Date Range */
+.admin-period-custom {
+    display: none;
     gap: 12px;
+    margin-top: 4px;
 }
 
-.admin-filter-half {
+.admin-period-custom.visible {
+    display: flex;
+}
+
+.admin-date-field {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.admin-filter-label {
+.admin-date-label {
     font-family: var(--font-family);
     font-size: 10px;
     font-weight: 500;
     letter-spacing: 1px;
     color: var(--color-text-muted);
-    text-transform: uppercase;
 }
 
-.admin-select {
-    background-color: var(--color-bg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.admin-date-input {
+    background-color: var(--color-bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--color-text-primary);
     font-family: var(--font-family);
-    font-size: 13px;
-    height: 40px;
+    font-size: 14px;
+    height: 44px;
     padding: 0 12px;
     outline: none;
     -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    cursor: pointer;
-}
-
-.admin-select:focus {
-    border-color: var(--color-accent);
-}
-
-.admin-input-sm {
-    height: 40px;
-    padding: 0 12px;
-    background-color: var(--color-bg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    font-size: 13px;
-}
-
-.admin-input-sm:focus {
-    border-color: var(--color-accent);
-}
-
-/* Date input styling */
-input[type="date"].admin-input-sm {
     color-scheme: dark;
+    width: 100%;
 }
 
-/* Filter Actions */
-.admin-filter-actions {
+.admin-date-input:focus {
+    border-color: var(--color-accent);
+}
+
+/* Amount Range */
+.admin-amount-range {
     display: flex;
-    gap: 12px;
-    margin-top: 4px;
+    align-items: center;
+    gap: 10px;
 }
 
-.admin-filter-btn {
+.admin-amount-field {
     flex: 1;
     display: flex;
     align-items: center;
+    background-color: var(--color-bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    height: 44px;
+    padding: 0 12px;
+    transition: border-color var(--transition-fast);
+}
+
+.admin-amount-field:focus-within {
+    border-color: var(--color-accent);
+}
+
+.admin-amount-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-family);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    width: 100%;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+
+.admin-amount-input::placeholder {
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+.admin-amount-input[type="number"]::-webkit-inner-spin-button,
+.admin-amount-input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.admin-amount-currency {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+.admin-amount-separator {
+    font-family: var(--font-family);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+/* Filters Footer / Apply Button */
+.admin-filters-footer {
+    margin-top: 8px;
+}
+
+.admin-apply-filters-btn {
+    display: flex;
+    align-items: center;
     justify-content: center;
-    height: 40px;
+    width: 100%;
+    height: 52px;
     background-color: var(--color-accent);
     border: none;
     cursor: pointer;
@@ -348,30 +724,17 @@ input[type="date"].admin-input-sm {
     -webkit-tap-highlight-color: transparent;
 }
 
-.admin-filter-btn:active {
+.admin-apply-filters-btn:active {
     transform: scale(0.98);
     opacity: 0.9;
 }
 
-.admin-filter-btn span {
+.admin-apply-filters-btn span {
     font-family: var(--font-family);
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     letter-spacing: 1px;
     color: var(--color-bg);
-}
-
-.admin-filter-btn-reset {
-    background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.admin-filter-btn-reset span {
-    color: var(--color-text-muted);
-}
-
-.admin-filter-btn-reset:active {
-    background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* ========================================
@@ -387,7 +750,6 @@ input[type="date"].admin-input-sm {
     font-size: 14px;
     font-weight: 700;
     color: var(--color-accent);
-    margin-left: auto;
 }
 
 /* Order Card */

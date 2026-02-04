@@ -83,86 +83,135 @@
             </section>
         </div>
 
-        <!-- Tab: Orders -->
+        <!-- Tab: Orders — View 1: Orders List -->
         <div class="admin-tab-content" id="adminTabOrders" data-tab="orders">
-            <section class="admin-section">
-                <div class="admin-section-header">
-                    <div class="accent-bar"></div>
-                    <span class="section-title">ВСЕ ЗАЯВКИ</span>
-                    <span class="admin-orders-total" id="adminOrdersTotal"></span>
-                </div>
+            <!-- View: Orders List -->
+            <div class="admin-orders-view" id="adminOrdersListView">
+                <section class="admin-section">
+                    <!-- Header Row -->
+                    <div class="admin-orders-header">
+                        <div class="admin-orders-header-left">
+                            <div class="accent-bar"></div>
+                            <span class="section-title">ВСЕ ЗАЯВКИ</span>
+                            <span class="admin-orders-total" id="adminOrdersTotal"></span>
+                        </div>
+                        <button class="admin-filter-toggle" id="adminOpenFilters">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                            <span>Фильтры</span>
+                            <span class="admin-filter-count" id="adminFilterCount" style="display:none;">0</span>
+                        </button>
+                    </div>
 
-                <!-- Orders Filters -->
-                <div class="admin-orders-filters">
+                    <!-- Active Filter Chips -->
+                    <div class="admin-active-filters" id="adminActiveFilters" style="display:none;"></div>
+
+                    <!-- Orders List -->
+                    <div class="admin-orders-list" id="adminOrdersList"></div>
+
+                    <!-- Pagination -->
+                    <div class="admin-pagination" id="adminPagination" style="display: none;">
+                        <button class="admin-page-btn" id="adminPrevPage">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <span class="admin-page-info" id="adminPageInfo">1 / 1</span>
+                        <button class="admin-page-btn" id="adminNextPage">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="admin-orders-empty" id="adminOrdersEmpty" style="display: none;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1.5" style="opacity:0.4;margin-bottom:8px;">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                            <rect x="9" y="3" width="6" height="4" rx="1"/>
+                            <path d="M9 14l2 2 4-4"/>
+                        </svg>
+                        <span class="empty-title">Нет заявок</span>
+                        <span class="empty-desc">По выбранным фильтрам заявки не найдены</span>
+                    </div>
+                </section>
+            </div>
+
+            <!-- View: Filters Page -->
+            <div class="admin-orders-view admin-filters-page" id="adminFiltersView">
+                <section class="admin-section">
+                    <!-- Filters Header -->
+                    <div class="admin-filters-header">
+                        <button class="admin-filters-back" id="adminFiltersBack">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <span class="admin-filters-title">ФИЛЬТРЫ</span>
+                        <button class="admin-filters-reset-link" id="adminResetFilters">Сбросить</button>
+                    </div>
+
                     <!-- Status Filter -->
-                    <div class="admin-filter-row">
-                        <label class="admin-filter-label">Статус</label>
-                        <select id="adminFilterStatus" class="admin-select">
-                            <option value="">Все</option>
-                            <option value="pending">В обработке</option>
-                            <option value="confirmed">Подтверждено</option>
-                            <option value="rejected">Отклонено</option>
-                            <option value="cancelled">Отменено</option>
-                        </select>
-                    </div>
-                    <!-- Order ID -->
-                    <div class="admin-filter-row">
-                        <label class="admin-filter-label">ID заявки</label>
-                        <input type="number" id="adminFilterOrderId" class="admin-input admin-input-sm" placeholder="Номер" />
-                    </div>
-                    <!-- Amount Range -->
-                    <div class="admin-filter-row admin-filter-row-double">
-                        <div class="admin-filter-half">
-                            <label class="admin-filter-label">Сумма от</label>
-                            <input type="number" id="adminFilterAmountMin" class="admin-input admin-input-sm" placeholder="Мин" />
-                        </div>
-                        <div class="admin-filter-half">
-                            <label class="admin-filter-label">Сумма до</label>
-                            <input type="number" id="adminFilterAmountMax" class="admin-input admin-input-sm" placeholder="Макс" />
+                    <div class="admin-filter-group">
+                        <label class="admin-filter-group-label">СТАТУС</label>
+                        <div class="admin-status-chips" id="adminStatusChips">
+                            <button class="admin-status-chip" data-status="pending">
+                                <span class="admin-status-dot dot-pending"></span>
+                                В обработке
+                            </button>
+                            <button class="admin-status-chip" data-status="confirmed">
+                                <span class="admin-status-dot dot-confirmed"></span>
+                                Подтверждено
+                            </button>
+                            <button class="admin-status-chip" data-status="rejected">
+                                <span class="admin-status-dot dot-rejected"></span>
+                                Отклонено
+                            </button>
+                            <button class="admin-status-chip" data-status="cancelled">
+                                <span class="admin-status-dot dot-cancelled"></span>
+                                Отменено
+                            </button>
                         </div>
                     </div>
-                    <!-- Date Range -->
-                    <div class="admin-filter-row admin-filter-row-double">
-                        <div class="admin-filter-half">
-                            <label class="admin-filter-label">Дата от</label>
-                            <input type="date" id="adminFilterDateFrom" class="admin-input admin-input-sm" />
+
+                    <!-- Period Filter -->
+                    <div class="admin-filter-group">
+                        <label class="admin-filter-group-label">ПЕРИОД</label>
+                        <div class="admin-period-presets" id="adminPeriodPresets">
+                            <button class="admin-period-btn active" data-period="all">Все время</button>
+                            <button class="admin-period-btn" data-period="today">Сегодня</button>
+                            <button class="admin-period-btn" data-period="week">Неделя</button>
+                            <button class="admin-period-btn" data-period="month">Месяц</button>
                         </div>
-                        <div class="admin-filter-half">
-                            <label class="admin-filter-label">Дата до</label>
-                            <input type="date" id="adminFilterDateTo" class="admin-input admin-input-sm" />
+                        <div class="admin-period-custom" id="adminPeriodCustom">
+                            <div class="admin-date-field">
+                                <label class="admin-date-label">От</label>
+                                <input type="date" id="adminFilterDateFrom" class="admin-date-input" />
+                            </div>
+                            <div class="admin-date-field">
+                                <label class="admin-date-label">До</label>
+                                <input type="date" id="adminFilterDateTo" class="admin-date-input" />
+                            </div>
                         </div>
                     </div>
-                    <!-- Filter Actions -->
-                    <div class="admin-filter-actions">
-                        <button class="admin-filter-btn" id="adminApplyFilters">
-                            <span>ПРИМЕНИТЬ</span>
+
+                    <!-- Amount Filter -->
+                    <div class="admin-filter-group">
+                        <label class="admin-filter-group-label">СУММА ЗАЯВКИ</label>
+                        <div class="admin-amount-range">
+                            <div class="admin-amount-field">
+                                <input type="number" id="adminFilterAmountMin" class="admin-amount-input" placeholder="Мин" inputmode="numeric" />
+                                <span class="admin-amount-currency">₽</span>
+                            </div>
+                            <span class="admin-amount-separator">—</span>
+                            <div class="admin-amount-field">
+                                <input type="number" id="adminFilterAmountMax" class="admin-amount-input" placeholder="Макс" inputmode="numeric" />
+                                <span class="admin-amount-currency">₽</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Apply Button -->
+                    <div class="admin-filters-footer">
+                        <button class="admin-apply-filters-btn" id="adminApplyFilters">
+                            <span>ПОКАЗАТЬ ЗАЯВКИ</span>
                         </button>
-                        <button class="admin-filter-btn admin-filter-btn-reset" id="adminResetFilters">
-                            <span>СБРОСИТЬ</span>
-                        </button>
                     </div>
-                </div>
-
-                <!-- Orders List -->
-                <div class="admin-orders-list" id="adminOrdersList"></div>
-
-                <!-- Pagination -->
-                <div class="admin-pagination" id="adminPagination" style="display: none;">
-                    <button class="admin-page-btn" id="adminPrevPage">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-                    </button>
-                    <span class="admin-page-info" id="adminPageInfo">1 / 1</span>
-                    <button class="admin-page-btn" id="adminNextPage">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                    </button>
-                </div>
-
-                <!-- Empty State -->
-                <div class="admin-orders-empty" id="adminOrdersEmpty" style="display: none;">
-                    <span class="empty-title">Нет заявок</span>
-                    <span class="empty-desc">По выбранным фильтрам заявки не найдены</span>
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
     </main>
 </div>
