@@ -198,13 +198,13 @@
     opacity: 0.9;
 }
 
-/* Status: Rejected (админ отклонил — серый, как отменено) */
+/* Status: Rejected (админ отклонил — красный) */
 .request-card[data-status="rejected"] .request-accent {
-    background-color: #6b7280;
+    background-color: #dc2626;
 }
 
 .request-card[data-status="rejected"] .request-badge {
-    color: #6b7280;
+    color: #dc2626;
 }
 
 .request-card[data-status="rejected"] .request-title,

@@ -563,11 +563,11 @@
 }
 
 .admin-status-dot.dot-rejected {
-    background-color: #6b7280;
+    background-color: #dc2626;
 }
 
 .admin-status-dot.dot-cancelled {
-    background-color: #dc2626;
+    background-color: #6b7280;
 }
 
 /* Period Presets */
@@ -788,11 +788,11 @@
 }
 
 .admin-order-accent.status-rejected {
-    background-color: #6b7280;
+    background-color: #dc2626;
 }
 
 .admin-order-accent.status-cancelled {
-    background-color: #dc2626;
+    background-color: #6b7280;
 }
 
 .admin-order-info {
@@ -850,13 +850,13 @@
 }
 
 .admin-order-badge.badge-rejected {
-    background-color: rgba(107, 114, 128, 0.15);
-    color: #6b7280;
+    background-color: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
 }
 
 .admin-order-badge.badge-cancelled {
-    background-color: rgba(220, 38, 38, 0.15);
-    color: #dc2626;
+    background-color: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
 }
 
 .admin-order-date {
@@ -1158,13 +1158,13 @@
 }
 
 .admin-detail-badge.badge-rejected {
-    background-color: rgba(107, 114, 128, 0.2);
-    color: #6b7280;
+    background-color: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
 }
 
 .admin-detail-badge.badge-cancelled {
-    background-color: rgba(220, 38, 38, 0.2);
-    color: #dc2626;
+    background-color: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
 }
 
 /* Detail rows */
@@ -1206,6 +1206,14 @@
     font-family: 'SF Mono', 'Monaco', monospace;
     font-size: 12px;
     color: var(--color-text-muted);
+}
+
+.admin-modal-tg-link {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+.admin-modal-tg-link:hover {
+    text-decoration: underline;
 }
 
 .admin-detail-separator {

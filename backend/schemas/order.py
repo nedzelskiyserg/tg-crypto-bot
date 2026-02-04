@@ -28,6 +28,7 @@ class OrderResponse(BaseModel):
     """Order response schema"""
     id: int
     user_id: int
+    username: str | None = None
     status: OrderStatus
 
     full_name: str

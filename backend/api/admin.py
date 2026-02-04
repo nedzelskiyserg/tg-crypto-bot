@@ -5,11 +5,12 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy import select, func
+from sqlalchemy.orm import joinedload
 
 from backend.api.deps import DbSession, CurrentUser
 from backend.models.order import Order, OrderStatus
-from backend.models.rate_settings import RateSettings
 from backend.schemas.order import OrderResponse
+from backend.models.rate_settings import RateSettings
 from backend.services.admin_loader import load_admin_ids
 from backend.services.rate_loader import get_raw_rates, save_markup_settings
 
@@ -205,17 +206,23 @@ async def get_all_orders(
     total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
 
-    # Apply ordering and pagination
-    query = query.order_by(Order.created_at.desc())
+    # Apply ordering and pagination (join User for username in response)
+    query = query.options(joinedload(Order.user)).order_by(Order.created_at.desc())
     query = query.offset((page - 1) * page_size).limit(page_size)
 
     result = await db.execute(query)
-    orders = result.scalars().all()
+    orders = result.unique().scalars().all()
 
     total_pages = max(1, (total + page_size - 1) // page_size)
+    orders_response = [
+        OrderResponse.model_validate(o).model_copy(
+            update={"username": o.user.username if o.user else None}
+        )
+        for o in orders
+    ]
 
     return AdminOrdersResponse(
-        orders=orders,
+        orders=orders_response,
         total=total,
         page=page,
         page_size=page_size,

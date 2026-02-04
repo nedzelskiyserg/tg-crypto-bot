@@ -1008,8 +1008,16 @@ function openAdminOrderModal(orderId) {
         }
     }
 
-    // User info
-    setAdminModalText('adminModalTgId', order.user_id || '—');
+    // User info: Telegram — юзернейм ссылкой t.me/username (без @)
+    var tgEl = document.getElementById('adminModalTgId');
+    if (tgEl) {
+        var un = order.username ? String(order.username).replace(/^@/, '') : '';
+        if (un) {
+            tgEl.innerHTML = '<a href="https://t.me/' + escapeHtmlAdmin(un) + '" target="_blank" rel="noopener" class="admin-modal-tg-link">' + escapeHtmlAdmin(un) + '</a>';
+        } else {
+            tgEl.textContent = order.user_id ? order.user_id : '—';
+        }
+    }
     setAdminModalText('adminModalName', order.full_name || '—');
     setAdminModalText('adminModalPhone', order.phone || '—');
     setAdminModalText('adminModalEmail', order.email || '—');
