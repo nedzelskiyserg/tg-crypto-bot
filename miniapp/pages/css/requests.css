@@ -535,8 +535,8 @@
 }
 
 .detail-badge.status-rejected {
-    background-color: rgba(107, 114, 128, 0.2);
-    color: #6b7280;
+    background-color: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
 }
 
 .detail-badge.status-expired {
