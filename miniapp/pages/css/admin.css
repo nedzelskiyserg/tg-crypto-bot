@@ -12,6 +12,7 @@
     padding-top: calc(97.92px + 20px);
     padding-bottom: 24px;
     box-sizing: border-box;
+    position: relative;
 }
 
 /* ========================================
@@ -601,4 +602,344 @@ input[type="date"].admin-input-sm {
 .admin-order-card.visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* ========================================
+   ORDERS HEADER + FILTERS BUTTON
+   ======================================== */
+.admin-orders-header {
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.admin-orders-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-filters-open-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    background-color: var(--color-bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--color-text-primary);
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+}
+
+.admin-filters-open-btn svg {
+    width: 18px;
+    height: 18px;
+    color: var(--color-accent);
+}
+
+.admin-filters-open-btn:active {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ========================================
+   ACTIVE FILTERS BAR (chips + change/clear)
+   ======================================== */
+.admin-active-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.admin-active-filters-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.admin-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background-color: var(--color-bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 100%;
+}
+
+.admin-filter-chip-text {
+    font-family: var(--font-family);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-filter-chip-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+}
+
+.admin-filter-chip-remove:active {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--color-text-primary);
+}
+
+.admin-active-filters-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.admin-active-filters-btn {
+    padding: 8px 0;
+    background: none;
+    border: none;
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.admin-active-filters-change {
+    color: var(--color-accent);
+}
+
+.admin-active-filters-clear {
+    color: var(--color-text-muted);
+}
+
+.admin-active-filters-btn:active {
+    opacity: 0.8;
+}
+
+/* ========================================
+   FILTERS PAGE (full-screen, mobile-first)
+   ======================================== */
+.admin-filters-page {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-bg);
+    z-index: 20;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: adminFiltersPageIn 0.25s ease forwards;
+}
+
+.admin-filters-page.active {
+    display: flex;
+}
+
+.admin-tab-content.filters-overlay-hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+@keyframes adminFiltersPageIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.admin-filters-page-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 24px 20px 100px;
+    padding-top: calc(97.92px + 16px);
+}
+
+.admin-filters-header {
+    margin-bottom: 24px;
+}
+
+.admin-filters-title {
+    font-family: var(--font-family);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+}
+
+.admin-filters-desc {
+    font-family: var(--font-family);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.admin-filters-form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.admin-filters-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.admin-filters-group-title {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    margin: 0 0 4px;
+}
+
+.admin-filters-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-filters-field-half {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-filters-row {
+    display: flex;
+    gap: 12px;
+}
+
+.admin-filters-label {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.admin-filters-input,
+.admin-filters-select {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    background-color: var(--color-bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+    font-family: var(--font-family);
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+}
+
+.admin-filters-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.admin-filters-input:focus,
+.admin-filters-select:focus {
+    border-color: var(--color-accent);
+}
+
+.admin-filters-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+}
+
+.admin-filters-input-date {
+    color-scheme: dark;
+}
+
+.admin-filters-page-actions {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 16px 20px 24px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(to top, var(--color-bg) 70%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-filters-apply-btn {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-accent);
+    border: none;
+    color: var(--color-bg);
+    font-family: var(--font-family);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.admin-filters-apply-btn:active {
+    opacity: 0.9;
+    transform: scale(0.99);
+}
+
+.admin-filters-reset-btn {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-text-muted);
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.admin-filters-reset-btn:active {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-secondary);
 }

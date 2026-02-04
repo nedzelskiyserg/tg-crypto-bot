@@ -245,7 +245,17 @@ function showPage(pageName) {
     if (tg) {
         if (pageName !== 'home') {
             tg.BackButton.show();
-            tg.BackButton.onClick(() => showPage('home'));
+            if (pageName === 'admin') {
+                tg.BackButton.onClick(() => {
+                    if (window.adminFiltersVisible && typeof window.closeAdminFiltersPage === 'function') {
+                        window.closeAdminFiltersPage();
+                    } else {
+                        showPage('home');
+                    }
+                });
+            } else {
+                tg.BackButton.onClick(() => showPage('home'));
+            }
         } else {
             tg.BackButton.hide();
         }
