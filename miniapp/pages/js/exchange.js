@@ -3,21 +3,21 @@
  * Handles buy/sell exchange functionality
  */
 
-// Exchange state (prefilled for testing)
+// Exchange state (initially empty, no prefilled demo data)
 window.exchangeState = {
     mode: 'buy',
-    amount: 10000,
+    amount: 0,
     receiveAmount: 0,
     currency: 'RUB',
     receiveCurrency: 'USDT',
-    surname: 'Иванов',
-    name: 'Иван',
-    patronymic: 'Иванович',
-    phone: '+79001234567',
-    email: 'test@example.com',
-    wallet: 'TJYeasTPa6gpEEfYBzaFNj7aGCGvdMcsVc',
+    surname: '',
+    name: '',
+    patronymic: '',
+    phone: '',
+    email: '',
+    wallet: '',
     bankCard: '',  // Bank card for sell mode
-    termsAccepted: true
+    termsAccepted: false
 };
 
 // Get API base URL: same origin when miniapp served from backend (production), else config or localhost
