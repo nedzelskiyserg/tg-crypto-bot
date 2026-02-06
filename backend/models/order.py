@@ -34,6 +34,7 @@ class Order(Base):
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     phone: Mapped[str] = mapped_column(String(50), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
+    tg_username: Mapped[str] = mapped_column(String(255), nullable=True, default="")
 
     # Exchange info
     currency_from: Mapped[str] = mapped_column(String(20), nullable=False)

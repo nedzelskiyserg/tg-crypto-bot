@@ -10,6 +10,7 @@ window.exchangeState = {
     receiveAmount: 0,
     currency: 'RUB',
     receiveCurrency: 'USDT',
+    telegram: '',
     surname: '',
     name: '',
     patronymic: '',
@@ -194,6 +195,9 @@ window.initExchangePage = function() {
             setTimeout(waitForElements, 100);
             return;
         }
+
+        // Auto-populate Telegram username from WebApp
+        autoPopulateTelegram();
 
         // Setup input handlers for buy mode
         setupAmountInput();
@@ -563,11 +567,31 @@ function setupBankCardInput() {
 }
 
 /**
+ * Auto-populate Telegram username from Telegram WebApp initData
+ */
+function autoPopulateTelegram() {
+    if (window.exchangeState.telegram) return; // already set
+
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (tgUser && tgUser.username) {
+        const username = '@' + tgUser.username;
+        window.exchangeState.telegram = username;
+
+        // Set value in both inputs
+        const telegramInput = document.getElementById('telegramInput');
+        const telegramInputSell = document.getElementById('telegramInputSell');
+        if (telegramInput) telegramInput.value = username;
+        if (telegramInputSell) telegramInputSell.value = username;
+    }
+}
+
+/**
  * Setup data inputs
  */
 function setupDataInputs() {
     // Buy mode inputs
     const buyInputs = [
+        { id: 'telegramInput', field: 'telegram' },
         { id: 'surnameInput', field: 'surname' },
         { id: 'nameInput', field: 'name' },
         { id: 'patronymicInput', field: 'patronymic' },
@@ -578,6 +602,7 @@ function setupDataInputs() {
 
     // Sell mode inputs
     const sellInputs = [
+        { id: 'telegramInputSell', field: 'telegram' },
         { id: 'surnameInputSell', field: 'surname' },
         { id: 'nameInputSell', field: 'name' },
         { id: 'patronymicInputSell', field: 'patronymic' },
@@ -611,7 +636,20 @@ function setupDataInputs() {
 
         input.addEventListener('input', (e) => {
             let value = e.target.value;
-            if (field === 'wallet') {
+            if (field === 'telegram') {
+                // Allow only valid Telegram username chars, auto-prefix with @
+                value = value.replace(/[^A-Za-z0-9_@]/g, '');
+                // Remove any @ that is not at the start
+                const atCount = (value.match(/@/g) || []).length;
+                if (atCount > 1) {
+                    value = '@' + value.replace(/@/g, '');
+                }
+                // Auto-add @ prefix if user started typing without it
+                if (value.length > 0 && !value.startsWith('@')) {
+                    value = '@' + value;
+                }
+                e.target.value = value;
+            } else if (field === 'wallet') {
                 value = value.replace(/[^A-Za-z0-9]/g, '');
                 e.target.value = value;
             }
@@ -644,6 +682,7 @@ function syncInputValue(field, value) {
  */
 function getBuyInputId(field) {
     const map = {
+        'telegram': 'telegramInput',
         'surname': 'surnameInput',
         'name': 'nameInput',
         'patronymic': 'patronymicInput',
@@ -659,6 +698,7 @@ function getBuyInputId(field) {
  */
 function getSellInputId(field) {
     const map = {
+        'telegram': 'telegramInputSell',
         'surname': 'surnameInputSell',
         'name': 'nameInputSell',
         'patronymic': 'patronymicInputSell',
@@ -676,6 +716,10 @@ function validateInput(input, field) {
     let isValid = false;
 
     switch (field) {
+        case 'telegram':
+            // @username: at least 2 chars, starts with @, valid Telegram username chars
+            isValid = value.length >= 2 && /^@[A-Za-z0-9_]{1,}$/.test(value);
+            break;
         case 'surname':
         case 'name':
         case 'patronymic':
@@ -786,11 +830,13 @@ function validateForm() {
 
     // Buy mode: wallet required; Sell mode: no wallet needed
     const walletValid = s.mode === 'buy' ? (s.wallet.length === 34 && s.wallet.startsWith('T')) : true;
+    const telegramValid = s.telegram.length >= 2 && /^@[A-Za-z0-9_]{1,}$/.test(s.telegram);
     const phoneValid = s.phone.length >= 10 && /^[\+]?[0-9\s\-\(\)]+$/.test(s.phone);
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email);
 
     const isValid =
         s.amount > 0 &&
+        telegramValid &&
         s.surname.length >= 2 &&
         s.name.length >= 2 &&
         s.patronymic.length >= 2 &&
@@ -1064,6 +1110,7 @@ window.submitExchange = function() {
         let msg = 'Заполните все обязательные поля';
 
         if (window.exchangeState.amount <= 0) msg = 'Введите сумму';
+        else if (!window.exchangeState.telegram || !/^@[A-Za-z0-9_]{1,}$/.test(window.exchangeState.telegram)) msg = 'Введите Telegram @username';
         else if (!window.exchangeState.phone || window.exchangeState.phone.length < 10) msg = 'Введите номер телефона';
         else if (!window.exchangeState.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(window.exchangeState.email)) msg = 'Введите корректный email';
         else if (!window.exchangeState.termsAccepted) msg = 'Примите условия сервиса';
@@ -1088,6 +1135,7 @@ window.submitExchange = function() {
         full_name: fullName,
         phone: s.phone,
         email: s.email,
+        tg_username: s.telegram,
         currency_from: s.currency,
         amount_from: s.amount,
         currency_to: s.receiveCurrency,
@@ -1100,8 +1148,8 @@ window.submitExchange = function() {
     console.log('[Exchange] Submit data:', apiData);
 
     const confirmMessage = s.mode === 'buy'
-        ? `Покупка USDT\n\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\nКошелёк: ${s.wallet.slice(0,8)}...${s.wallet.slice(-4)}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`
-        : `Продажа USDT\n\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`;
+        ? `Покупка USDT\n\nTelegram: ${s.telegram}\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\nКошелёк: ${s.wallet.slice(0,8)}...${s.wallet.slice(-4)}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`
+        : `Продажа USDT\n\nTelegram: ${s.telegram}\nИмя: ${fullName}\nТелефон: ${s.phone}\nEmail: ${s.email}\n\nОтдаёте: ${formatNumber(s.amount)} ${s.currency}\nПолучите: ${formatNumber(parseFloat(receiveValue))} ${s.receiveCurrency}`;
 
     if (tg) {
         tg.showPopup({
@@ -1204,6 +1252,7 @@ async function sendOrderToAPI(orderData) {
  */
 function resetExchangeForm() {
     // Reset state (keep amount and mode)
+    window.exchangeState.telegram = '';
     window.exchangeState.surname = '';
     window.exchangeState.name = '';
     window.exchangeState.patronymic = '';
@@ -1215,8 +1264,8 @@ function resetExchangeForm() {
 
     // Reset input fields
     const inputIds = [
-        'surnameInput', 'nameInput', 'patronymicInput', 'phoneInput', 'emailInput', 'walletInput',
-        'surnameInputSell', 'nameInputSell', 'patronymicInputSell', 'phoneInputSell', 'emailInputSell',
+        'telegramInput', 'surnameInput', 'nameInput', 'patronymicInput', 'phoneInput', 'emailInput', 'walletInput',
+        'telegramInputSell', 'surnameInputSell', 'nameInputSell', 'patronymicInputSell', 'phoneInputSell', 'emailInputSell',
         'bankCardInputSell', 'amountInputSell', 'receiveValueSell'
     ];
 
@@ -1233,6 +1282,9 @@ function resetExchangeForm() {
     const checkboxSell = document.getElementById('termsCheckboxSell');
     if (checkboxBuy) checkboxBuy.classList.remove('checked');
     if (checkboxSell) checkboxSell.classList.remove('checked');
+
+    // Refill Telegram username from WebApp (if available)
+    autoPopulateTelegram();
 
     validateForm();
 }

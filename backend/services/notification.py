@@ -34,8 +34,14 @@ async def notify_admins_new_order(bot, order: Order, user: User) -> None:
         print("Warning: No admin IDs found, notification not sent")
         return
 
-    # Format username
-    username_display = f"@{user.username}" if user.username else "не указан"
+    # Format username: prefer tg_username from order form, fallback to user.username
+    tg_un = (order.tg_username or "").strip()
+    if tg_un:
+        username_display = tg_un if tg_un.startswith("@") else f"@{tg_un}"
+    elif user.username:
+        username_display = f"@{user.username}"
+    else:
+        username_display = "не указан"
 
     # Determine order type
     is_buy = str(order.currency_from).upper() == "RUB"

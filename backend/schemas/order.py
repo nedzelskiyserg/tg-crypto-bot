@@ -11,6 +11,7 @@ class OrderCreate(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=255)
     phone: str = Field(..., min_length=5, max_length=50)
     email: EmailStr
+    tg_username: str = Field(default="", max_length=255)
 
     currency_from: str = Field(..., min_length=1, max_length=20)
     amount_from: Decimal = Field(..., gt=0)
@@ -29,6 +30,7 @@ class OrderResponse(BaseModel):
     id: int
     user_id: int
     username: str | None = None
+    tg_username: str | None = None
     status: OrderStatus
 
     full_name: str

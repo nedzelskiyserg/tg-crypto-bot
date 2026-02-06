@@ -216,7 +216,7 @@ async def get_all_orders(
     total_pages = max(1, (total + page_size - 1) // page_size)
     orders_response = [
         OrderResponse.model_validate(o).model_copy(
-            update={"username": o.user.username if o.user else None}
+            update={"username": o.tg_username or (o.user.username if o.user else None)}
         )
         for o in orders
     ]

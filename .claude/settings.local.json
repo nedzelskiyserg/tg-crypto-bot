@@ -15,7 +15,10 @@
       "Bash(/Users/serg.nedzelskiy/Documents/Работа/TG CRYPTO BOT/scripts/stop_tma.sh)",
       "Bash(bash:*)",
       "Bash(git -C \"/Users/serg.nedzelskiy/Documents/Работа/TG CRYPTO BOT\" log --oneline -20)",
-      "Bash(git -C \"/Users/serg.nedzelskiy/Documents/Работа/TG CRYPTO BOT\" diff bd71f32..HEAD -- backend/models/ backend/schemas/)"
+      "Bash(git -C \"/Users/serg.nedzelskiy/Documents/Работа/TG CRYPTO BOT\" diff bd71f32..HEAD -- backend/models/ backend/schemas/)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }

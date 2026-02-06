@@ -30,6 +30,7 @@ async def create_order(
         full_name=order_data.full_name,
         phone=order_data.phone,
         email=order_data.email,
+        tg_username=order_data.tg_username or "",
         currency_from=order_data.currency_from,
         amount_from=order_data.amount_from,
         currency_to=order_data.currency_to,
